@@ -1,4 +1,5 @@
 import numpy as np
+import regionmask
 
 ## WAM2layers functions needed to load data and convert units
 
@@ -13,7 +14,6 @@ def load_tagging_region(config, t=None):
         return tagging_region.sel(time=t, method="nearest")
     return tagging_region
 
-#region =  tagging_region.sel(time=t, method="nearest")
 def get_grid_info(ds):
     """Return grid cell area and lenght of the sides."""
     dg = 111089.56  # [m] length of 1 degree latitude
@@ -89,3 +89,23 @@ def calc_fractional_sources(sources, precipitation=None, lon_name="lon",lat_name
         moisture sources """
         
     return sources_frac
+
+def calc_regional_sources(sources, regions, weights=None,lon_name="lon",lat_name="lat"):
+    """ Returns regional moisture sources 
+
+    Standard assumes that the names of longitude and latitude 
+    dimension are "lon" and "lat" respectively. If this is not the case
+    lon_name and lat_name should be used.
+
+    Weights can be re-used for different ensemble memebers per model"""
+
+    if(weights is not None):
+        sources_per_region = sources.weighted(weights).sum(dim=(lat_name,lon_name))   
+    else:
+        mask_3D = regions.mask_3D(sources,lon_name=lon_name,lat_name = lat_name)
+        weights = np.cos(np.deg2rad(sources[lat_name]))
+        weights = (mask_3D * weights).fillna(0)
+        sources_per_region = sources.weighted(weights).sum(dim=(lat_name,lon_name))   
+
+    return sources_per_region, weights
+    
