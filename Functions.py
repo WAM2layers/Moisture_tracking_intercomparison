@@ -72,3 +72,20 @@ def get_grid_info_new(latitude, longitude):
     )  # [m] length southern boundary of a cell
     l_mid_gridcell = 0.5 * (l_n_gridcell + l_s_gridcell)
     return a_gridcell, l_ew_gridcell, l_mid_gridcell
+
+def calc_fractional_sources(sources, precipitation=None, lon_name="lon",lat_name="lat"):
+    """ Returns fractional moisture sources 
+    
+        Standard assumes that the names of longitude and latitude 
+        dimension are "lon" and "lat" respectively. If this is not the case
+        lon_name and lat_name should be used."""
+    
+    if(precipitation == None):
+        a_gridcell_new, l_ew_gridcell, l_mid_gridcell = get_grid_info_new(sources[lat_name],
+                                                                         sources[lon_name])
+        sources_frac = sources*a_gridcell_new/((sources*a_gridcell_new).sum((lon_name,lat_name)))*100.0
+    else:
+        """ Should be adapted so that the area-weighted precipitation can be used to bias correct
+        moisture sources """
+        
+    return sources_frac
