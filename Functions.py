@@ -78,7 +78,20 @@ def calc_fractional_sources(sources, precipitation=None, lon_name="lon",lat_name
     
         Standard assumes that the names of longitude and latitude 
         dimension are "lon" and "lat" respectively. If this is not the case
-        lon_name and lat_name should be used."""
+        lon_name and lat_name should be used.
+        
+        Input: 
+        sources: (xarray) array containing the moisture sources
+        lon_name: Name of longitude dimension
+        lat_name: Name of latitude dimension
+        precipitation: Optional array containing the precipitation of the model
+        
+        If no precipitation array is provided, thre fractional sources will be caluclated
+        with respect to the total moisture sources
+        
+        Otherwise it will calculate fractional sources with respect to the total precipitation
+        of the event*
+        *DOES NOT WORK YET!"""
     
     if(precipitation == None):
         a_gridcell_new, l_ew_gridcell, l_mid_gridcell = get_grid_info_new(sources[lat_name],
