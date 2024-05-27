@@ -24,6 +24,10 @@ authors:
     family-names: Staal
     affiliation: Utrecht University
     orcid: 'https://orcid.org/0000-0001-5409-1436'
+  - given-names: Jianhui
+    family-names: Wei
+    affiliation: Karlsruhe Institute of Technology
+    orcid: 'https://orcid.org/0000-0001-8609-9600'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
