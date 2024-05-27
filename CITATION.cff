@@ -32,6 +32,10 @@ authors:
     family-names: Aemisegger
     affiliation: University of Bern
     orcid: 'https://orcid.org/0000-0002-4022-9825'
+  - given-names: Chiara M
+    family-names: Holgate
+    affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
+    orcid: 'https://orcid.org/0000-0002-3645-2856'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
