@@ -32,6 +32,11 @@ authors:
     family-names: Aemisegger
     affiliation: University of Bern
     orcid: 'https://orcid.org/0000-0002-4022-9825'
+  - given-names: Andrea
+    family-names: Taschetto
+    affiliation: University of New South Wales
+    orcid: 'https://orcid.org/0000-0001-6020-1603'
+
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
