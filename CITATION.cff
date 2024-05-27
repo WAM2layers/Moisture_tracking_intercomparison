@@ -20,6 +20,10 @@ authors:
     family-names: Kalverla
     affiliation: Netherlands eScience Center
     orcid: 'https://orcid.org/0000-0002-5025-7862'
+  - given-names: Arie
+    family-names: Staal
+    affiliation: Utrecht University
+    orcid: 'https://orcid.org/0000-0001-5409-1436'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
