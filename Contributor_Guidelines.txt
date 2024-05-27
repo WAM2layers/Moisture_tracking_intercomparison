@@ -1,0 +1,11 @@
+Contributor guidelines:
+
+Technical guideline
+1. Use commenting in scripts so everyone can understand
+2. Don't upload any output data or figures
+
+Guidelines related to working environment
+1. Treat everyone with respect
+2. We recognize and celebrate team accomplishments
+3. We encourage active participation
+4. Everyone can take ownership
