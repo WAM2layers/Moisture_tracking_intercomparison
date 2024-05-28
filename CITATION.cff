@@ -36,6 +36,10 @@ authors:
     family-names: Holgate
     affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
     orcid: 'https://orcid.org/0000-0002-3645-2856'
+  - given-names: Gerbrand
+    family-names: Koren
+    affiliation: Utrecht University
+    orcid: 'https://orcid.org/0000-0002-2275-0713'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
