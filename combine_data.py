@@ -80,98 +80,28 @@ def read_utrack(basedir):
 
 
 def read_ughent(basedir):
-    ########################################################
-    ## HAMSTER (Ghent)                                    ##
-    ########################################################
+    """Read data from university of Ghent.
 
-    # E1: Sodemann #
-    temp = xr.open_dataset(
-        basedir
-        + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens1_sod08/bias_corrected_20220810120000_sod08.nc"
-    )
-    srcs_ghent_e1 = temp["E2P_BC"].mean(
-        "time"
-    )  # Mean over time to remove time dimension
+    Generated with HAMSTER.
+    """
+    base = Path(basedir) / "results UGhent HAMSTER/Pakistan simulations/bias_corrected"
 
-    for date in range(11, 25):
-        temp = xr.open_dataset(
-            basedir
-            + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens1_sod08/bias_corrected_202208"
-            + str(date)
-            + "120000_sod08.nc"
-        )
-        srcs_ghent_e1 += temp["E2P_BC"].mean("time")
-
-    # E2: FAS19 (Fremme + Sodemann, 2019) #
-    temp = xr.open_dataset(
-        basedir
-        + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens2_fas19/bias_corrected_20220810120000_fas19.nc"
-    )
-    srcs_ghent_e2 = temp["E2P_BC"].mean("time")
-
-    for date in range(11, 25):
-        temp = xr.open_dataset(
-            basedir
-            + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens2_fas19/bias_corrected_202208"
-            + str(date)
-            + "120000_fas19.nc"
-        )
-        srcs_ghent_e2 += temp["E2P_BC"].mean("time")
-
-    # E3: FAS19 (Fremme + Sodemann, 2019) #
-    temp = xr.open_dataset(
-        basedir
-        + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens3_rh20/bias_corrected_20220810120000_rh20.nc"
-    )
-    srcs_ghent_e3 = temp["E2P_BC"].mean("time")
-
-    for date in range(11, 25):
-        temp = xr.open_dataset(
-            basedir
-            + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens3_rh20/bias_corrected_202208"
-            + str(date)
-            + "120000_rh20.nc"
-        )
-        srcs_ghent_e3 += temp["E2P_BC"].mean("time")
-
-    # E4:
-    temp = xr.open_dataset(
-        basedir
-        + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens4_allabl/bias_corrected_20220810120000_allabl.nc"
-    )
-    srcs_ghent_e4 = temp["E2P_BC"].mean("time")
-
-    for date in range(11, 25):
-        temp = xr.open_dataset(
-            basedir
-            + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens4_allabl/bias_corrected_202208"
-            + str(date)
-            + "120000_allabl.nc"
-        )
-        srcs_ghent_e4 += temp["E2P_BC"].mean("time")
-
-    # E5:
-    temp = xr.open_dataset(
-        basedir
-        + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens5_rhadap80/bias_corrected_20220810120000_rhadap80.nc"
-    )
-    srcs_ghent_e5 = temp["E2P_BC"].mean("time")
-
-    for date in range(11, 25):
-        temp = xr.open_dataset(
-            basedir
-            + "results UGhent HAMSTER/Pakistan simulations/bias_corrected/ens5_rhadap80/bias_corrected_202208"
-            + str(date)
-            + "120000_rhadap80.nc"
-        )
-        srcs_ghent_e5 += temp["E2P_BC"].mean("time")
-    return {
-        "ghent_e5": srcs_ghent_e5,
-        "ghent_e4": srcs_ghent_e4,
-        "ghent_e3": srcs_ghent_e3,
-        "ghent_e2": srcs_ghent_e2,
-        "ghent_e1": srcs_ghent_e1,
+    ensemble_members = {
+        "ghent_e1": "ens1_sod08",
+        "ghent_e2": "ens2_fas19",
+        "ghent_e3": "ens3_rh20",
+        "ghent_e4": "ens4_allabl",
+        "ghent_e5": "ens5_rhadap80",
     }
+
+    ensemble = {}
+    for name, ens in ensemble_members.items():
+        files = (base / ens).glob(f"bias_corrected_202208*120000_{ens[5:]}.nc")
+        ensemble[name] = xr.open_mfdataset(
+            files, combine="nested", concat_dim="time"
+        ).sum("time")["E2P_BC"]
+
+    return ensemble
 
 
 def read_tracmass(basedir):
