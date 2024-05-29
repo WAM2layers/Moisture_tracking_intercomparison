@@ -1,5 +1,6 @@
 #### Necessary libraries ####
 import os
+from pathlib import Path
 
 import xarray as xr
 
@@ -38,6 +39,7 @@ def read_wam2layers(basedir):
     ).rename(latitude="lat", longitude="lon")
     lat = dsall.lat.values
     lon = dsall.lon.values
+
     a_gridcell_new, l_ew_gridcell, l_mid_gridcell = get_grid_info_new(lat, lon)
     E_track_totalmm = (dsall / a_gridcell_new) * 1000  # mm
     srcs_wam2layers_new = E_track_totalmm["e_track"].sum("time")  # mm
@@ -51,15 +53,10 @@ def read_wrf_wvt(basedir):
 
 def read_uvigo(basedir):
     """Read data from University of Vigo"""
-    srcs_Vigo_e1_Stohl = xr.open_dataset(basedir + "results Uvigo/ERA5_SJ05_reg.nc")[
-        "E_P"
-    ]
-    srcs_Vigo_e2_Sodemann = xr.open_dataset(
-        basedir + "results Uvigo/ERA5_APA22_reg.nc"
-    )["E_P"]
+    path = Path(basedir) / "results Uvigo"
     return {
-        "Vigo_e2_Sodemann": srcs_Vigo_e2_Sodemann,
-        "Vigo_e1_Stohl": srcs_Vigo_e1_Stohl,
+        "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
+        "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
     }
 
 
