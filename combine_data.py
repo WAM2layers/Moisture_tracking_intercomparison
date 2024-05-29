@@ -1,3 +1,15 @@
+"""Combine data.
+
+This module contains functionality for reading the data contributed to the
+comparison. Each contributed dataset has can be loaded with its own function.
+There is also a function `read_data_pakistan` that reads data for all models in
+one go.
+
+Each data reading function gets the base directory as a pathlib Path object, and
+should return an xarray dataset, with one or more variables that carry the name(s)
+of the model/method or ensemble members.
+"""
+
 from pathlib import Path
 
 import xarray as xr
