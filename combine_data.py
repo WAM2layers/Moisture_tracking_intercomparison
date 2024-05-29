@@ -158,7 +158,7 @@ srcs_flexpart_xu = ds_flexpart_xu["variable"].sum("time")
 ds_lagranto_CHc = xr.open_mfdataset(basedir+"results CHc LAGRANTO/Pakistan_2022_CHc_*.nc", combine = 'nested', concat_dim='time')
 srcs_lagranto_CHc = ds_lagranto_CHc["N"].sum("time").squeeze().rename(dimy_N='lat', dimx_N='lon')
 srcs_lagranto_CHc.assign_coords(lat=srcs_TRACMASS.lat, lon=srcs_TRACMASS.lon)
-srcs_lagranto_CHc = srcs_lagranto_CHc.assign_coords(lat=srcs_TRACMASS.lat, lon=srcs_TRACMASS.lon)
+srcs_lagranto_CHc = srcs_lagranto_CHc.assign_coords(lat=srcs_TRACMASS.lat[::-1], lon=srcs_TRACMASS.lon)
 
 ########################################################
 ## FLEXPART UniVie                                    ##
