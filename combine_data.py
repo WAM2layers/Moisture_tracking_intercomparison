@@ -1,5 +1,4 @@
 #### Necessary libraries ####
-import os
 from pathlib import Path
 
 import xarray as xr
@@ -9,10 +8,12 @@ from Functions import grid_cell_area
 
 def read_wam2layers(basedir):
     """Read data for WAM2layers."""
-    path = Path(basedir) / "results WAM2layers"
+    path = basedir / "results WAM2layers"
+    filename_pattern = "backtrack_*T00-00.nc"
+
     # Data loading this way gives an error message for me while plotting, but in principe it should work
     dsall = xr.open_mfdataset(
-        path.glob("backtrack_*T00-00.nc"),
+        path.glob(filename_pattern),
         combine="nested",
         concat_dim="time",
     ).rename(latitude="lat", longitude="lon")
@@ -36,7 +37,7 @@ def read_wrf_wvt(basedir):
 
 def read_uvigo(basedir):
     """Read data from University of Vigo"""
-    path = Path(basedir) / "results Uvigo"
+    path = basedir / "results Uvigo"
     return {
         "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
         "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
@@ -55,7 +56,7 @@ def read_utrack(basedir):
     # TODO check units with Arie
     n_gridcells_pakistan = (71 - 67) / 0.25 * (30 - 24) / 0.25
 
-    path = Path(basedir) / "results Utrack Arie Staal/moisture_tracking_intercomparsion"
+    path = basedir / "results Utrack Arie Staal/moisture_tracking_intercomparsion"
 
     ensemble_members = {
         "utrack_e1": path.glob("*_mixing48h_dt025h_100p.nc"),
@@ -84,7 +85,8 @@ def read_ughent(basedir):
 
     Generated with HAMSTER.
     """
-    base = Path(basedir) / "results UGhent HAMSTER/Pakistan simulations/bias_corrected"
+    path = basedir / "results UGhent HAMSTER/Pakistan simulations/bias_corrected"
+    filename_pattern = "bias_corrected_202208*120000_{ensemble}.nc"
 
     ensemble_members = {
         "ghent_e1": "ens1_sod08",
@@ -96,7 +98,7 @@ def read_ughent(basedir):
 
     ensemble = {}
     for name, ens in ensemble_members.items():
-        files = (base / ens).glob(f"bias_corrected_202208*120000_{ens[5:]}.nc")
+        files = (path / ens).glob(filename_pattern.format(ensemble=ens[5:]))
         ensemble[name] = xr.open_mfdataset(
             files, combine="nested", concat_dim="time"
         ).sum("time")["E2P_BC"]
@@ -111,15 +113,16 @@ def read_tracmass(basedir):
     Units in mm/day, so multiplied with # of event days.
     """
     nrdays = 15
+    path = basedir / "results TRACMASS Dipanjan Dey"
 
-    diagnostics_path = (
-        Path(basedir) / "results TRACMASS Dipanjan Dey/TRACMASS_diagnostics.nc"
-    )
-    ds = xr.open_dataset(diagnostics_path)  # Evaporative sources (and preicp?) mm/day
+    ds = xr.open_dataset(
+        path / "TRACMASS_diagnostics.nc"
+    )  # Evaporative sources (and preicp?) mm/day
 
     # Not used, but good to know it's available.
-    # pr_path = Path(basedir) / "results TRACMASS Dipanjan Dey/PR_ERA5_TRACMASS.nc"
-    # ds_pr_TRACMASS = xr.open_dataset(pr_path)  # Precip ERA5 and TRACMASS Comparison
+    # ds_pr_TRACMASS = xr.open_dataset(
+    #     path / "PR_ERA5_TRACMASS.nc"
+    # )  # Precip ERA5 and TRACMASS Comparison
 
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
@@ -138,11 +141,10 @@ def read_flexpart_tatfancheng(basedir):
 
     Generated with FLEXPART-Watersip
     """
-    path = (
-        Path(basedir)
-        / "results FLEXPART_WaterSip_TatFanCheng/WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
-    )
-    ds = xr.open_dataset(path)
+    path = basedir / "results FLEXPART_WaterSip_TatFanCheng"
+    filename = "WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
+
+    ds = xr.open_dataset(path / filename)
 
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
@@ -160,11 +162,12 @@ def read_flexpart_tatfancheng(basedir):
 
 def read_flexpart_xu(basedir):
     """Read flexpart data from Xu."""
-    path = Path(basedir) / "results Ru_Xu_FLEXPART/e_daily.nc"
+    path = basedir / "results Ru_Xu_FLEXPART"
+    filename = "e_daily.nc"
 
     # Load, rename coords, select variable, and accumulate over time
     ds = (
-        xr.open_dataset(path)["variable"]
+        xr.open_dataset(path / filename)["variable"]
         .rename(latitude="lat", longitude="lon")
         .sum("time")
     )
@@ -174,13 +177,14 @@ def read_flexpart_xu(basedir):
 
 def read_lagranto_chc(basedir):
     """Read lagranto CHc data."""
-    path = Path(basedir) / "results CHc LAGRANTO/Pakistan_2022_CHc_eventtotal_ens1.nc"
+    path = basedir / "results CHc LAGRANTO"
+    filename = "Pakistan_2022_CHc_eventtotal_ens1.nc"
 
     # Use TRACMASS to get coordinate values
     ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
 
     ds = (
-        xr.open_dataset(path)
+        xr.open_dataset(path / filename)
         .rename(dimx_N="lon", dimy_N="lat")["N"]
         .sum("time")
         .squeeze()
@@ -194,8 +198,10 @@ def read_lagranto_chc(basedir):
 
 def read_flexpart_univie(basedir):
     """Read data for Flexpart UniVie."""
-    path = Path(basedir) / "results univie FLEXPART/pakistan_univie.nc"
-    ds = xr.open_dataset(path).sum("time")
+    path = basedir / "results univie FLEXPART"
+    filename = "pakistan_univie.nc"
+
+    ds = xr.open_dataset(path / filename).sum("time")
 
     return {
         "flexpart_univie": ds["moisture_uptakes_bl"] + ds["moisture_uptakes_ft"],
@@ -204,9 +210,10 @@ def read_flexpart_univie(basedir):
 
 def read_2ldrm(basedir):
     """Read data for 2ldrm."""
-    path = Path(basedir) / "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
+    path = basedir / "results 2LDRM"
+    filename = "2LDRM_Pakistan_case_gl.nc"
     ds = (
-        xr.open_dataset(path)
+        xr.open_dataset(path / filename)
         .rename(latitude="lat", longitude="lon")["moisture_source"]
         .sum("time")
         .T
@@ -219,12 +226,10 @@ def read_2ldrm(basedir):
 
 def read_flexpart_uib(basedir):
     """Read data for flexpart uib."""
-    path = (
-        Path(basedir)
-        / "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    )
+    path = basedir / "results UiB FLEXPART WaterSip"
+    filename = "Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
     return {
-        "flexpart_uib": xr.open_dataset(path)["moisture_uptakes"],
+        "flexpart_uib": xr.open_dataset(path / filename)["moisture_uptakes"],
     }
 
 
@@ -242,6 +247,7 @@ def read_data_pakistan(basedir):
     - Extra ensemble members of Flexpart-Watersip produced by Fandy
     """
     # Combine cumulative moisture sources for all models in one netcdf
+    basedir = Path(basedir)
     datasets = {
         # TODO: uncomment after editing (don't have the latest data atm)
         # **read_2ldrm(basedir),
