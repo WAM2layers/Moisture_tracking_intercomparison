@@ -235,9 +235,8 @@ def read_data_pakistan(basedir):
 
     return xr.merge(
         [
-            # TODO: uncomment after editing (don't have the latest data atm)
-            # read_2ldrm(basedir),
-            # read_flexpart_uib(basedir),
+            read_2ldrm(basedir),
+            read_flexpart_uib(basedir),
             read_lagranto_chc(basedir),
             read_flexpart_xu(basedir),
             read_flexpart_tatfancheng(basedir),
