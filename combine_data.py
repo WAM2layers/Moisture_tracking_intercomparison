@@ -173,21 +173,22 @@ def read_flexpart_xu(basedir):
 
 
 def read_lagranto_chc(basedir):
-    ########################################################
-    ## Lagranto CHc                                       ##
-    ########################################################
-    ds_lagranto_CHc = xr.open_dataset(
-        basedir + "results CHc LAGRANTO/Pakistan_2022_CHc_eventtotal_ens1.nc"
-    ).rename(dimx_N="lon", dimy_N="lat")
-    srcs_lagranto_CHc = ds_lagranto_CHc["N"].sum("time").squeeze()
+    """Read lagranto CHc data."""
+    path = Path(basedir) / "results CHc LAGRANTO/Pakistan_2022_CHc_eventtotal_ens1.nc"
 
     # Use TRACMASS to get coordinate values
-    srcs_TRACMASS = read_tracmass(basedir)["TRACMASS"]
-    srcs_lagranto_CHc = srcs_lagranto_CHc.assign_coords(
-        lat=srcs_TRACMASS.lat[::-1], lon=srcs_TRACMASS.lon
+    ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
+
+    ds = (
+        xr.open_dataset(path)
+        .rename(dimx_N="lon", dimy_N="lat")["N"]
+        .sum("time")
+        .squeeze()
+        .assign_coords(lat=ds_TRACMASS.lat[::-1], lon=ds_TRACMASS.lon)
     )
+
     return {
-        "lagranto_CHc": srcs_lagranto_CHc,
+        "lagranto_CHc": ds,
     }
 
 
