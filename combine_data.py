@@ -105,25 +105,28 @@ def read_ughent(basedir):
 
 
 def read_tracmass(basedir):
-    ########################################################
-    ## TRACMASS Dipanjan Dey                              ##
-    ## Units in mm/day, so multiplied with # of           ##
-    ## event days                                         ##
-    ########################################################
-    nrdays = 15
-    ds_TRACMASS = xr.open_dataset(
-        basedir + "results TRACMASS Dipanjan Dey/TRACMASS_diagnostics.nc"
-    )  # Evaporative sources (and preicp?) mm/day
-    ds_pr_TRACMASS = xr.open_dataset(
-        basedir + "results TRACMASS Dipanjan Dey/PR_ERA5_TRACMASS.nc"
-    )  # Precip ERA5 and TRACMASS Comparison
-    # convert to -180 to 180 lon
-    ds_TRACMASS.coords["lon"] = (ds_TRACMASS.coords["lon"] + 180) % 360 - 180
-    ds_TRACMASS = ds_TRACMASS.sortby(ds_TRACMASS.lon)
+    """Read tracmass data.
 
-    srcs_TRACMASS = (
-        ds_TRACMASS["E_TRACMASS"] * nrdays
-    )  # Units of data is mm/day but we want mm over whole time period
+    Data supplied by Dipanjan Dey
+    Units in mm/day, so multiplied with # of event days.
+    """
+    nrdays = 15
+
+    diagnostics_path = (
+        Path(basedir) / "results TRACMASS Dipanjan Dey/TRACMASS_diagnostics.nc"
+    )
+    ds = xr.open_dataset(diagnostics_path)  # Evaporative sources (and preicp?) mm/day
+
+    # Not used, but good to know it's available.
+    # pr_path = Path(basedir) / "results TRACMASS Dipanjan Dey/PR_ERA5_TRACMASS.nc"
+    # ds_pr_TRACMASS = xr.open_dataset(pr_path)  # Precip ERA5 and TRACMASS Comparison
+
+    # convert to -180 to 180 lon
+    ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
+    ds = ds.sortby(ds.lon)
+
+    # Units of data is mm/day but we want mm over whole time period
+    srcs_TRACMASS = ds["E_TRACMASS"] * nrdays
 
     return {
         "TRACMASS": srcs_TRACMASS,
