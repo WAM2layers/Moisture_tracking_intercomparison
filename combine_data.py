@@ -134,24 +134,24 @@ def read_tracmass(basedir):
 
 
 def read_flexpart_tatfancheng(basedir):
-    ########################################################
-    ## FLEXPART-Watersip TatFanCheng                      ##
-    ########################################################
-    filename = (
-        basedir
-        + "results FLEXPART_WaterSip_TatFanCheng/WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
+    """Read flexpart data from tatfancheng.
+
+    Generated with FLEXPART-Watersip
+    """
+    path = (
+        Path(basedir)
+        / "results FLEXPART_WaterSip_TatFanCheng/WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
     )
-    ds_flexpart_tatfancheng = xr.open_dataset(filename)
+    ds = xr.open_dataset(path)
 
     # convert to -180 to 180 lon
-    ds_flexpart_tatfancheng.coords["lon"] = (
-        ds_flexpart_tatfancheng.coords["lon"] + 180
-    ) % 360 - 180
+    ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
 
     # Use TRACMASS to sort
+    # TODO return tracmass (and other datasets as xr dataset instead of dict)
     ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
-    ds_flexpart_tatfancheng = ds_flexpart_tatfancheng.sortby(ds_TRACMASS.lon)
-    srcs_flexpart_tatfancheng = ds_flexpart_tatfancheng.sum("time")["Cb"]
+    ds = ds.sortby(ds_TRACMASS.lon)
+    srcs_flexpart_tatfancheng = ds.sum("time")["Cb"]
 
     return {
         "flexpart_tatfancheng": srcs_flexpart_tatfancheng,
@@ -159,16 +159,17 @@ def read_flexpart_tatfancheng(basedir):
 
 
 def read_flexpart_xu(basedir):
-    ########################################################
-    ## Flexpart Ru Xu                                     ##
-    ########################################################
-    ds_flexpart_xu = xr.open_dataset(
-        basedir + "results Ru_Xu_FLEXPART/e_daily.nc"
-    ).rename(latitude="lat", longitude="lon")
-    srcs_flexpart_xu = ds_flexpart_xu["variable"].sum("time")
-    return {
-        "flexpart_xu": srcs_flexpart_xu,
-    }
+    """Read flexpart data from Xu."""
+    path = Path(basedir) / "results Ru_Xu_FLEXPART/e_daily.nc"
+
+    # Load, rename coords, select variable, and accumulate over time
+    ds = (
+        xr.open_dataset(path)["variable"]
+        .rename(latitude="lat", longitude="lon")
+        .sum("time")
+    )
+
+    return {"flexpart_xu": ds}
 
 
 def read_lagranto_chc(basedir):
