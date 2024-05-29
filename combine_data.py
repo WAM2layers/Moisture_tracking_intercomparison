@@ -1,4 +1,3 @@
-#### Necessary libraries ####
 from pathlib import Path
 
 import xarray as xr
@@ -28,7 +27,7 @@ def read_wam2layers(basedir):
     E_track_totalmm = (dsall / a_gridcell_new) * 1000  # mm
     srcs_wam2layers_new = E_track_totalmm["e_track"].sum("time")  # mm
 
-    return {"wam2layers_new": srcs_wam2layers_new}
+    return srcs_wam2layers_new.rename("wam2layers")
 
 
 def read_wrf_wvt(basedir):
@@ -38,10 +37,12 @@ def read_wrf_wvt(basedir):
 def read_uvigo(basedir):
     """Read data from University of Vigo"""
     path = basedir / "results Uvigo"
-    return {
-        "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
-        "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
-    }
+    return xr.Dataset(
+        {
+            "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
+            "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+        }
+    )
 
 
 def read_utrack(basedir):
@@ -77,7 +78,7 @@ def read_utrack(basedir):
             * n_gridcells_pakistan
         )
 
-    return ensemble
+    return xr.Dataset(ensemble)
 
 
 def read_ughent(basedir):
@@ -103,7 +104,7 @@ def read_ughent(basedir):
             files, combine="nested", concat_dim="time"
         ).sum("time")["E2P_BC"]
 
-    return ensemble
+    return xr.Dataset(ensemble)
 
 
 def read_tracmass(basedir):
@@ -129,11 +130,7 @@ def read_tracmass(basedir):
     ds = ds.sortby(ds.lon)
 
     # Units of data is mm/day but we want mm over whole time period
-    srcs_TRACMASS = ds["E_TRACMASS"] * nrdays
-
-    return {
-        "TRACMASS": srcs_TRACMASS,
-    }
+    return ds["E_TRACMASS"].rename("TRACMASS") * nrdays
 
 
 def read_flexpart_tatfancheng(basedir):
@@ -150,14 +147,11 @@ def read_flexpart_tatfancheng(basedir):
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
 
     # Use TRACMASS to sort
-    # TODO return tracmass (and other datasets as xr dataset instead of dict)
-    ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
+    ds_TRACMASS = read_tracmass(basedir)
     ds = ds.sortby(ds_TRACMASS.lon)
     srcs_flexpart_tatfancheng = ds.sum("time")["Cb"]
 
-    return {
-        "flexpart_tatfancheng": srcs_flexpart_tatfancheng,
-    }
+    return srcs_flexpart_tatfancheng.rename("flexpart_tatfancheng")
 
 
 def read_flexpart_xu(basedir):
@@ -166,13 +160,12 @@ def read_flexpart_xu(basedir):
     filename = "e_daily.nc"
 
     # Load, rename coords, select variable, and accumulate over time
-    ds = (
+    return (
         xr.open_dataset(path / filename)["variable"]
         .rename(latitude="lat", longitude="lon")
         .sum("time")
+        .rename("flexpart_xu")
     )
-
-    return {"flexpart_xu": ds}
 
 
 def read_lagranto_chc(basedir):
@@ -181,19 +174,16 @@ def read_lagranto_chc(basedir):
     filename = "Pakistan_2022_CHc_eventtotal_ens1.nc"
 
     # Use TRACMASS to get coordinate values
-    ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
+    ds_TRACMASS = read_tracmass(basedir)
 
-    ds = (
+    return (
         xr.open_dataset(path / filename)
         .rename(dimx_N="lon", dimy_N="lat")["N"]
         .sum("time")
         .squeeze()
         .assign_coords(lat=ds_TRACMASS.lat[::-1], lon=ds_TRACMASS.lon)
+        .rename("lagranto_CHc")
     )
-
-    return {
-        "lagranto_CHc": ds,
-    }
 
 
 def read_flexpart_univie(basedir):
@@ -202,35 +192,29 @@ def read_flexpart_univie(basedir):
     filename = "pakistan_univie.nc"
 
     ds = xr.open_dataset(path / filename).sum("time")
+    combined = ds["moisture_uptakes_bl"] + ds["moisture_uptakes_ft"]
 
-    return {
-        "flexpart_univie": ds["moisture_uptakes_bl"] + ds["moisture_uptakes_ft"],
-    }
+    return combined.rename("flexpart_univie")
 
 
 def read_2ldrm(basedir):
     """Read data for 2ldrm."""
     path = basedir / "results 2LDRM"
     filename = "2LDRM_Pakistan_case_gl.nc"
-    ds = (
+
+    return (
         xr.open_dataset(path / filename)
         .rename(latitude="lat", longitude="lon")["moisture_source"]
         .sum("time")
-        .T
+        .T.rename("2ldrm")
     )
-
-    return {
-        "2ldrm": ds,
-    }
 
 
 def read_flexpart_uib(basedir):
     """Read data for flexpart uib."""
     path = basedir / "results UiB FLEXPART WaterSip"
     filename = "Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    return {
-        "flexpart_uib": xr.open_dataset(path / filename)["moisture_uptakes"],
-    }
+    return xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
 
 
 def read_data_pakistan(basedir):
@@ -248,20 +232,19 @@ def read_data_pakistan(basedir):
     """
     # Combine cumulative moisture sources for all models in one netcdf
     basedir = Path(basedir)
-    datasets = {
-        # TODO: uncomment after editing (don't have the latest data atm)
-        # **read_2ldrm(basedir),
-        # **read_flexpart_uib(basedir),
-        **read_lagranto_chc(basedir),
-        **read_flexpart_xu(basedir),
-        **read_flexpart_tatfancheng(basedir),
-        **read_tracmass(basedir),
-        **read_ughent(basedir),
-        **read_utrack(basedir),
-        **read_uvigo(basedir),
-        **read_wam2layers(basedir),
-    }
 
-    all_maps = xr.Dataset(datasets)
-
-    return all_maps
+    return xr.merge(
+        [
+            # TODO: uncomment after editing (don't have the latest data atm)
+            # read_2ldrm(basedir),
+            # read_flexpart_uib(basedir),
+            read_lagranto_chc(basedir),
+            read_flexpart_xu(basedir),
+            read_flexpart_tatfancheng(basedir),
+            read_tracmass(basedir),
+            read_ughent(basedir),
+            read_utrack(basedir),
+            read_uvigo(basedir),
+            read_wam2layers(basedir),
+        ]
+    )
