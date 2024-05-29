@@ -3,31 +3,11 @@ import os
 
 import xarray as xr
 
-from Functions import *
+from Functions import get_grid_info_new, get_grid_info
 
 
-def read_data_pakistan(basedir):
-    """Examples of data loading of moisture sources
-
-    Data is loaded per individual ensemble member for each model.
-    All data is converted to mm evaporative sources over the whole time period
-
-    WRF-WVT is not included yet, as well CHc Lagranto and univie FLEXPART
-
-    There might also be a few (new) ensemble members not included yet:
-    - For the HAMSTER model (Ughent) there is an additional ensemble member not included yet
-    - Extra ensemble members of Flexpart-Watersip produced by Fandy
-    """
-
-    ########################################################
-    ## WRF-WVT                                            ##
-    ########################################################
-
-    # Just csv file because of nature of simulations #
-
-    ########################################################
-    ## WAM2layers                                         ##
-    ########################################################
+def read_wam2layers(basedir):
+    """Read data for WAM2layers."""
     directory_str = basedir + "results WAM2layers/"
     directory = os.fsencode(directory_str)
     n = 0
@@ -62,16 +42,28 @@ def read_data_pakistan(basedir):
     E_track_totalmm = (dsall / a_gridcell_new) * 1000  # mm
     srcs_wam2layers_new = E_track_totalmm["e_track"].sum("time")  # mm
 
-    ########################################################
-    ## University of Vigo                                 ##
-    ########################################################
+    return {"wam2layers_new": srcs_wam2layers_new}
+
+
+def read_wrf_wvt(basedir):
+    raise NotImplementedError("Not availabe as netCDF due to nature of simulations.")
+
+
+def read_uvigo(basedir):
+    """Read data from University of Vigo"""
     srcs_Vigo_e1_Stohl = xr.open_dataset(basedir + "results Uvigo/ERA5_SJ05_reg.nc")[
         "E_P"
     ]
     srcs_Vigo_e2_Sodemann = xr.open_dataset(
         basedir + "results Uvigo/ERA5_APA22_reg.nc"
     )["E_P"]
+    return {
+        "Vigo_e2_Sodemann": srcs_Vigo_e2_Sodemann,
+        "Vigo_e1_Stohl": srcs_Vigo_e1_Stohl,
+    }
 
+
+def read_utrack(basedir):
     ########################################################
     ## UTRACK - Arie Staal                                ##
     ## - Based on the communication with Arie             ##
@@ -126,6 +118,16 @@ def read_data_pakistan(basedir):
     )
     srcs_utrack_e5 = dsall["moisture_source"].sum("time") * n_gridcells_pakistan
 
+    return {
+        "utrack_e5": srcs_utrack_e5,
+        "utrack_e4": srcs_utrack_e4,
+        "utrack_e3": srcs_utrack_e3,
+        "utrack_e2": srcs_utrack_e2,
+        "utrack_e1": srcs_utrack_e1,
+    }
+
+
+def read_ughent(basedir):
     ########################################################
     ## HAMSTER (Ghent)                                    ##
     ########################################################
@@ -211,7 +213,16 @@ def read_data_pakistan(basedir):
             + "120000_rhadap80.nc"
         )
         srcs_ghent_e5 += temp["E2P_BC"].mean("time")
+    return {
+        "ghent_e5": srcs_ghent_e5,
+        "ghent_e4": srcs_ghent_e4,
+        "ghent_e3": srcs_ghent_e3,
+        "ghent_e2": srcs_ghent_e2,
+        "ghent_e1": srcs_ghent_e1,
+    }
 
+
+def read_tracmass(basedir):
     ########################################################
     ## TRACMASS Dipanjan Dey                              ##
     ## Units in mm/day, so multiplied with # of           ##
@@ -232,6 +243,12 @@ def read_data_pakistan(basedir):
         ds_TRACMASS["E_TRACMASS"] * nrdays
     )  # Units of data is mm/day but we want mm over whole time period
 
+    return {
+        "TRACMASS": srcs_TRACMASS,
+    }
+
+
+def read_flexpart_tatfancheng(basedir):
     ########################################################
     ## FLEXPART-Watersip TatFanCheng                      ##
     ########################################################
@@ -240,13 +257,23 @@ def read_data_pakistan(basedir):
         + "results FLEXPART_WaterSip_TatFanCheng/WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
     )
     ds_flexpart_tatfancheng = xr.open_dataset(filename)
+
     # convert to -180 to 180 lon
     ds_flexpart_tatfancheng.coords["lon"] = (
         ds_flexpart_tatfancheng.coords["lon"] + 180
     ) % 360 - 180
+
+    # Use TRACMASS to sort
+    ds_TRACMASS = read_tracmass(basedir)["TRACMASS"]
     ds_flexpart_tatfancheng = ds_flexpart_tatfancheng.sortby(ds_TRACMASS.lon)
     srcs_flexpart_tatfancheng = ds_flexpart_tatfancheng.sum("time")["Cb"]
 
+    return {
+        "flexpart_tatfancheng": srcs_flexpart_tatfancheng,
+    }
+
+
+def read_flexpart_xu(basedir):
     ########################################################
     ## Flexpart Ru Xu                                     ##
     ########################################################
@@ -254,7 +281,12 @@ def read_data_pakistan(basedir):
         basedir + "results Ru_Xu_FLEXPART/e_daily.nc"
     ).rename(latitude="lat", longitude="lon")
     srcs_flexpart_xu = ds_flexpart_xu["variable"].sum("time")
+    return {
+        "flexpart_xu": srcs_flexpart_xu,
+    }
 
+
+def read_lagranto_chc(basedir):
     ########################################################
     ## Lagranto CHc                                       ##
     ########################################################
@@ -262,10 +294,18 @@ def read_data_pakistan(basedir):
         basedir + "results CHc LAGRANTO/Pakistan_2022_CHc_eventtotal_ens1.nc"
     ).rename(dimx_N="lon", dimy_N="lat")
     srcs_lagranto_CHc = ds_lagranto_CHc["N"].sum("time").squeeze()
+
+    # Use TRACMASS to get coordinate values
+    srcs_TRACMASS = read_tracmass(basedir)["TRACMASS"]
     srcs_lagranto_CHc = srcs_lagranto_CHc.assign_coords(
         lat=srcs_TRACMASS.lat[::-1], lon=srcs_TRACMASS.lon
     )
+    return {
+        "lagranto_CHc": srcs_lagranto_CHc,
+    }
 
+
+def read_flexpart_univie():
     ########################################################
     ## FLEXPART UniVie                                    ##
     ########################################################
@@ -277,52 +317,67 @@ def read_data_pakistan(basedir):
         + ds_flexpart_univie["moisture_uptakes_ft"]
     ).sum("time")
 
-    ########################################################
-    ## 2LDRM                                              ##
-    ########################################################
-    # ds_2ldrm = xr.open_dataset(
-    #     basedir + "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
-    # ).rename(latitude="lat", longitude="lon")
-    # srcs_2ldrm = ds_2ldrm["moisture_source"].sum("time").T
+    return {
+        "flexpart_univie": srcs_flexpart_univie,
+    }
 
-    ########################################################
-    ## FLEXPART UiB                                       ##
-    ########################################################
-    # ds_flexpart_uib = xr.open_dataset(
-    #     basedir
-    #     + "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    # )
-    # srcs_flexpart_uib = ds_flexpart_uib["moisture_uptakes"]
 
+def read_2ldrm(basedir):
+    #######################################################
+    # 2LDRM                                              ##
+    #######################################################
+    ds_2ldrm = xr.open_dataset(
+        basedir + "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
+    ).rename(latitude="lat", longitude="lon")
+    srcs_2ldrm = ds_2ldrm["moisture_source"].sum("time").T
+
+    return {
+        "2ldrm": srcs_2ldrm,
+    }
+
+
+def read_flexpart_uib(basedir):
+    #######################################################
+    # FLEXPART UiB                                       ##
+    #######################################################
+    ds_flexpart_uib = xr.open_dataset(
+        basedir
+        + "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
+    )
+    srcs_flexpart_uib = ds_flexpart_uib["moisture_uptakes"]
+    return {
+        "flexpart_uib": srcs_flexpart_uib,
+    }
+
+
+def read_data_pakistan(basedir):
+    """Examples of data loading of moisture sources
+
+    Data is loaded per individual ensemble member for each model.
+    All data is converted to mm evaporative sources over the whole time period
+
+    # TODO: I think this comment is outdated, right?
+    WRF-WVT is not included yet, as well CHc Lagranto and univie FLEXPART
+
+    There might also be a few (new) ensemble members not included yet:
+    - For the HAMSTER model (Ughent) there is an additional ensemble member not included yet
+    - Extra ensemble members of Flexpart-Watersip produced by Fandy
+    """
     # Combine cumulative moisture sources for all models in one netcdf
     datasets = {
-        # "2ldrm": srcs_2ldrm,
-        # "flexpart_uib": srcs_flexpart_uib,
-        "flexpart_univie": srcs_flexpart_univie,
-        "lagranto_CHc": srcs_lagranto_CHc,
-        "flexpart_xu": srcs_flexpart_xu,
-        "flexpart_tatfancheng": srcs_flexpart_tatfancheng,
-        "TRACMASS": srcs_TRACMASS,
-        "ghent_e5": srcs_ghent_e5,
-        "ghent_e4": srcs_ghent_e4,
-        "ghent_e3": srcs_ghent_e3,
-        "ghent_e2": srcs_ghent_e2,
-        "ghent_e1": srcs_ghent_e1,
-        "utrack_e5": srcs_utrack_e5,
-        "utrack_e4": srcs_utrack_e4,
-        "utrack_e3": srcs_utrack_e3,
-        "utrack_e2": srcs_utrack_e2,
-        "utrack_e1": srcs_utrack_e1,
-        "Vigo_e2_Sodemann": srcs_Vigo_e2_Sodemann,
-        "Vigo_e1_Stohl": srcs_Vigo_e1_Stohl,
-        "wam2layers_new": srcs_wam2layers_new,
+        # TODO: uncomment after editing (don't have the latest data atm)
+        # **read_2ldrm(basedir),
+        # **read_flexpart_uib(basedir),
+        **read_lagranto_chc(basedir),
+        **read_flexpart_xu(basedir),
+        **read_flexpart_tatfancheng(basedir),
+        **read_tracmass(basedir),
+        **read_ughent(basedir),
+        **read_utrack(basedir),
+        **read_uvigo(basedir),
+        **read_wam2layers(basedir),
     }
 
     all_maps = xr.Dataset(datasets)
 
     return all_maps
-
-
-# I don't have the latest data (and can't redownload on 5G) so temporarily
-# excluded 2ldrm and flexpart_uib.
-# TODO: bring them back after editing.
