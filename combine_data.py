@@ -192,20 +192,13 @@ def read_lagranto_chc(basedir):
     }
 
 
-def read_flexpart_univie():
-    ########################################################
-    ## FLEXPART UniVie                                    ##
-    ########################################################
-    ds_flexpart_univie = xr.open_dataset(
-        basedir + "results univie FLEXPART/pakistan_univie.nc"
-    )
-    srcs_flexpart_univie = (
-        ds_flexpart_univie["moisture_uptakes_bl"]
-        + ds_flexpart_univie["moisture_uptakes_ft"]
-    ).sum("time")
+def read_flexpart_univie(basedir):
+    """Read data for Flexpart UniVie."""
+    path = Path(basedir) / "results univie FLEXPART/pakistan_univie.nc"
+    ds = xr.open_dataset(path).sum("time")
 
     return {
-        "flexpart_univie": srcs_flexpart_univie,
+        "flexpart_univie": ds["moisture_uptakes_bl"] + ds["moisture_uptakes_ft"],
     }
 
 
