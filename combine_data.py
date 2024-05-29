@@ -1,9 +1,8 @@
 #### Necessary libraries ####
-import numpy as np  # Numpy is the fundamental package for scientific computing in Python.
-import netCDF4 as nc  # NetCDF is the data format of the meteorological data that we use.
-import xarray as xr
-import datetime  # Datetime is a package to deal with dates.
 import os
+
+import xarray as xr
+
 from Functions import *
 
 
@@ -281,24 +280,24 @@ def read_data_pakistan(basedir):
     ########################################################
     ## 2LDRM                                              ##
     ########################################################
-    ds_2ldrm = xr.open_dataset(
-        basedir + "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
-    ).rename(latitude="lat", longitude="lon")
-    srcs_2ldrm = ds_2ldrm["moisture_source"].sum("time").T
+    # ds_2ldrm = xr.open_dataset(
+    #     basedir + "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
+    # ).rename(latitude="lat", longitude="lon")
+    # srcs_2ldrm = ds_2ldrm["moisture_source"].sum("time").T
 
     ########################################################
     ## FLEXPART UiB                                       ##
     ########################################################
-    ds_flexpart_uib = xr.open_dataset(
-        basedir
-        + "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    )
-    srcs_flexpart_uib = ds_flexpart_uib["moisture_uptakes"]
+    # ds_flexpart_uib = xr.open_dataset(
+    #     basedir
+    #     + "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
+    # )
+    # srcs_flexpart_uib = ds_flexpart_uib["moisture_uptakes"]
 
     # Combine cumulative moisture sources for all models in one netcdf
     datasets = {
-        "2ldrm": srcs_2ldrm,
-        "flexpart_uib": srcs_flexpart_uib,
+        # "2ldrm": srcs_2ldrm,
+        # "flexpart_uib": srcs_flexpart_uib,
         "flexpart_univie": srcs_flexpart_univie,
         "lagranto_CHc": srcs_lagranto_CHc,
         "flexpart_xu": srcs_flexpart_xu,
@@ -322,3 +321,8 @@ def read_data_pakistan(basedir):
     all_maps = xr.Dataset(datasets)
 
     return all_maps
+
+
+# I don't have the latest data (and can't redownload on 5G) so temporarily
+# excluded 2ldrm and flexpart_uib.
+# TODO: bring them back after editing.
