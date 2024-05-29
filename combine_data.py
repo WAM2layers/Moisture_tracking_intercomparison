@@ -4,43 +4,26 @@ from pathlib import Path
 
 import xarray as xr
 
-from Functions import get_grid_info_new, get_grid_info
+from Functions import grid_cell_area
 
 
 def read_wam2layers(basedir):
     """Read data for WAM2layers."""
-    directory_str = basedir + "results WAM2layers/"
-    directory = os.fsencode(directory_str)
-    n = 0
-
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        if filename.endswith(".nc"):
-            if n == 0:
-                temp = xr.open_dataset(os.path.join(directory_str, filename))
-                a_gridcell, lx, ly = get_grid_info(temp)
-                srcs_wam2layers = temp["e_track"] * 1000 / a_gridcell[:, None]
-                n += 1
-            else:
-                temp = xr.open_dataset(os.path.join(directory_str, filename))
-                a_gridcell, lx, ly = get_grid_info(temp)
-                srcs_wam2layers += temp["e_track"] * 1000 / a_gridcell[:, None]
-                n += 1
-            continue
-        else:
-            continue
-    srcs_wam2layers = srcs_wam2layers.rename(latitude="lat", longitude="lon")
-
+    path = Path(basedir) / "results WAM2layers"
     # Data loading this way gives an error message for me while plotting, but in principe it should work
     dsall = xr.open_mfdataset(
-        basedir + "results WAM2layers/backtrack_*T00-00.nc",
+        path.glob("backtrack_*T00-00.nc"),
         combine="nested",
         concat_dim="time",
     ).rename(latitude="lat", longitude="lon")
+
+    # Convert units
+    # TODO might not be necessary with latest version of data, see
+    # https://github.com/WAM2layers/Moisture_tracking_intercomparison/issues/43
     lat = dsall.lat.values
     lon = dsall.lon.values
 
-    a_gridcell_new, l_ew_gridcell, l_mid_gridcell = get_grid_info_new(lat, lon)
+    a_gridcell_new = grid_cell_area(lat, lon)
     E_track_totalmm = (dsall / a_gridcell_new) * 1000  # mm
     srcs_wam2layers_new = E_track_totalmm["e_track"].sum("time")  # mm
 
