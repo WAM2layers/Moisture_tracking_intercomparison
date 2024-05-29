@@ -203,30 +203,28 @@ def read_flexpart_univie(basedir):
 
 
 def read_2ldrm(basedir):
-    #######################################################
-    # 2LDRM                                              ##
-    #######################################################
-    ds_2ldrm = xr.open_dataset(
-        basedir + "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
-    ).rename(latitude="lat", longitude="lon")
-    srcs_2ldrm = ds_2ldrm["moisture_source"].sum("time").T
+    """Read data for 2ldrm."""
+    path = Path(basedir) / "results 2LDRM/2LDRM_Pakistan_case_gl.nc"
+    ds = (
+        xr.open_dataset(path)
+        .rename(latitude="lat", longitude="lon")["moisture_source"]
+        .sum("time")
+        .T
+    )
 
     return {
-        "2ldrm": srcs_2ldrm,
+        "2ldrm": ds,
     }
 
 
 def read_flexpart_uib(basedir):
-    #######################################################
-    # FLEXPART UiB                                       ##
-    #######################################################
-    ds_flexpart_uib = xr.open_dataset(
-        basedir
-        + "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
+    """Read data for flexpart uib."""
+    path = (
+        Path(basedir)
+        / "results UiB FLEXPART WaterSip/Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
     )
-    srcs_flexpart_uib = ds_flexpart_uib["moisture_uptakes"]
     return {
-        "flexpart_uib": srcs_flexpart_uib,
+        "flexpart_uib": xr.open_dataset(path)["moisture_uptakes"],
     }
 
 
