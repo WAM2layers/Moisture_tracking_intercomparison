@@ -16,40 +16,81 @@ authors:
     family-names: Weijenborg
     affiliation: Wageningen University
     orcid: 'https://orcid.org/0000-0003-1663-2806'
-  - given-names: Peter
-    family-names: Kalverla
-    affiliation: Netherlands eScience Center
-    orcid: 'https://orcid.org/0000-0002-5025-7862'
-  - given-names: Arie
-    family-names: Staal
-    affiliation: Utrecht University
-    orcid: 'https://orcid.org/0000-0001-5409-1436'
-  - given-names: Jianhui
-    family-names: Wei
-    affiliation: Karlsruhe Institute of Technology
-    orcid: 'https://orcid.org/0000-0001-8609-9600'
+  - given-names: Jessica
+    family-names: Keune
+    affiliation: European Centre for Medium-Range Weather Forecasts
+    orcid:
+# from here one alphabetically (can of course be changed in case of significant contributions)
   - given-names: Franziska
     family-names: Aemisegger
     affiliation: University of Bern
     orcid: 'https://orcid.org/0000-0002-4022-9825'
+  - given-names: Victoria M H
+    family-names: Deman
+    affiliation: Ghent University
+    orcid: 'https://orcid.org/0009-0002-0200-2408'
+  - given-names: Marina
+    family-names: Duetsch
+    affiliation: University of Vienna
+    orcid: 'https://orcid.org/0000-0002-1128-4198'
+  - given-names: Jason P
+    family-names: Evans
+    affiliation: Climate Change Research Centre and ARC Centre of Excellence for Climate Extremes, University of New South Wales
+    orcid: 'https://orcid.org/0000-0003-1776-3429'
   - given-names: Chiara M
     family-names: Holgate
     affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
     orcid: 'https://orcid.org/0000-0002-3645-2856'
+  - given-names: Peter
+    family-names: Kalverla
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0002-5025-7862'
+  - given-names: SeungUk
+    family-names: Kim
+    affiliation: University of Illiniois Urbana-Champaign
+    orcid: 'https://orcid.org/0000-0001-7788-5298'
   - given-names: Gerbrand
     family-names: Koren
     affiliation: Utrecht University
     orcid: 'https://orcid.org/0000-0002-2275-0713'
+  - given-names: Albenis 
+    family-names: Pérez-Alarcón
+    affiliation: University of Vigo
+    orcid: 'https://orcid.org/0000-0002-9454-2331'
+  - given-names: Harald
+    family-names: Sodemann
+    affiliation: Geophysical Institute, University of Bergen
+    orcid: 'https://orcid.org/0000-0002-8167-0860'
+  - given-names: Arie
+    family-names: Staal
+    affiliation: Utrecht University
+    orcid: 'https://orcid.org/0000-0001-5409-1436'
+  - given-names: Andrea S
+    family-names: Taschetto
+    affiliation: Climate Change Research Centre and ARC Centre of Excellence for Climate Extremes, University of New South Wales
+    orcid: 'https://orcid.org/0000-0001-6020-1603'
+  - given-names: Ruud J
+    family-names: van der Ent
+    affiliation: Delft University of Technology
+    orcid: 'https://orcid.org/0000-0001-5450-4333' 
+  - given-names: Jianhui
+    family-names: Wei
+    affiliation: Karlsruhe Institute of Technology
+    orcid: 'https://orcid.org/0000-0001-8609-9600'
+  - given-names: Ru
+    family-names: Xu
+    affiliation: Institute of Botany, The Chinese Academy of Sciences
+    orcid: 'https://orcid.org/0000-0002-5203-5980'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
-  to address and quantify uncertainty associated with moisture tracking models. 
-  Moisture tracking models follow the precipitated moisture in the atmosphere 
+  to address and quantify uncertainty associated with moisture tracking methods. 
+  Moisture tracking methods follow the precipitated moisture in the atmosphere 
   back in time to find out where precipitation was evaporated. Here we compare the 
   source regions of precipitation from multiple models for a diverse set of hydrometeorological cases
   that are selected.
 keywords:
-  - moisture tracking models
+  - moisture tracking methods
   - intercomparison
   - uncertainty
   - python
