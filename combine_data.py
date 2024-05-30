@@ -20,7 +20,7 @@ from Functions import grid_cell_area
 
 def read_wam2layers(basedir, casename):
     """Read data for WAM2layers."""
-    print("Loading wam2layers data for {casename}")
+    print(f"Loading wam2layers data for {casename}")
     path = basedir / casename / "results WAM2layers"
     filename_pattern = "backtrack_*T00-00.nc"
 
@@ -52,7 +52,7 @@ def read_wrf_wvt(basedir, casename):
 
 def read_uvigo(basedir, casename):
     """Read data from University of Vigo"""
-    print("Loading uvigo data for {casename}")
+    print(f"Loading uvigo data for {casename}")
 
     path = basedir / casename / "results Uvigo"
     return xr.Dataset(
@@ -72,7 +72,7 @@ def read_utrack(basedir, casename):
     results should be area corrected. Given the values I assumed that the area
     needs to be in km**2, however this should be checked.
     """
-    print("Loading utrack data for {casename}")
+    print(f"Loading utrack data for {casename}")
     # TODO check units with Arie
     n_gridcells_pakistan = (71 - 67) / 0.25 * (30 - 24) / 0.25
 
@@ -109,7 +109,7 @@ def read_ughent(basedir, casename):
 
     Generated with HAMSTER.
     """
-    print("Loading ughent data for {casename}")
+    print(f"Loading ughent data for {casename}")
     path = (
         basedir
         / casename
@@ -143,7 +143,7 @@ def read_tracmass(basedir, casename):
     """
     if casename == "Australia":
         print("Skipping tracmass data for {casename} - not available")
-    print("Loading tracmass data for {casename}")
+    print(f"Loading tracmass data for {casename}")
 
     nrdays = 15
     path = basedir / casename / "results TRACMASS Dipanjan Dey"
@@ -170,7 +170,7 @@ def read_flexpart_tatfancheng(basedir, casename):
 
     Generated with FLEXPART-Watersip
     """
-    print("Loading tatfancheng data for {casename}")
+    print(f"Loading tatfancheng data for {casename}")
     path = basedir / casename / "results FLEXPART_WaterSip_TatFanCheng"
 
     if casename == "Pakistan":
@@ -199,7 +199,7 @@ def read_flexpart_tatfancheng(basedir, casename):
 
 def read_flexpart_xu(basedir, casename):
     """Read flexpart data from Xu."""
-    print("Loading xu data for {casename}")
+    print(f"Loading xu data for {casename}")
     path = basedir / casename / "results Ru_Xu_FLEXPART"
 
     if casename == "Pakistan":
@@ -222,7 +222,7 @@ def read_flexpart_xu(basedir, casename):
 
 def read_lagranto_chc(basedir, casename):
     """Read lagranto CHc data."""
-    print("Loading CHc data for {casename}")
+    print(f"Loading CHc data for {casename}")
     path = basedir / casename / "results CHc LAGRANTO"
     filename = f"{casename}_2022_CHc_eventtotal_ens1.nc"
 
@@ -243,7 +243,7 @@ def read_lagranto_chc(basedir, casename):
 
 def read_flexpart_univie(basedir, casename):
     """Read data for Flexpart UniVie."""
-    print("Loading UniVie data for {casename}")
+    print(f"Loading UniVie data for {casename}")
     path = basedir / casename / "results univie FLEXPART"
     filename = f"{casename.lower()}_univie.nc"
 
@@ -255,7 +255,7 @@ def read_flexpart_univie(basedir, casename):
 
 def read_2ldrm(basedir, casename):
     """Read data for 2ldrm."""
-    print("Loading 2ldrm data for {casename}")
+    print(f"Loading 2ldrm data for {casename}")
     path = basedir / casename / "results 2LDRM"
     filename = f"2LDRM_{casename}_case_gl.nc"
 
@@ -275,7 +275,7 @@ def read_2ldrm(basedir, casename):
 
 def read_flexpart_uib(basedir, casename):
     """Read data for flexpart uib."""
-    print("Loading UIB data for {casename}")
+    print(f"Loading UIB data for {casename}")
     path = basedir / casename / "results UiB FLEXPART WaterSip"
     filename = "Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
     return xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
@@ -286,7 +286,7 @@ def read_btrims(basedir, casename):
     if casename == "Pakistan":
         print("Skipping data for btrims, Pakistan - Unavailable")
         return xr.Dataset()
-    print("Loading btrims data for {casename}")
+    print(f"Loading btrims data for {casename}")
     path = basedir / casename / "results_B-TrIMS"
 
     # TODO check this and refactor such that dates are not case dependent.
@@ -312,7 +312,7 @@ def read_btrims(basedir, casename):
     )
 
 
-def read_data_pakistan(basedir, casename):
+def read_data(basedir, casename):
     """Examples of data loading of moisture sources
 
     Data is loaded per individual ensemble member for each model.
