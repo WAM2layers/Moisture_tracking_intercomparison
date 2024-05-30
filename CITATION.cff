@@ -40,6 +40,62 @@ authors:
     family-names: Koren
     affiliation: Utrecht University
     orcid: 'https://orcid.org/0000-0002-2275-0713'
+  - given-names: Ruud J
+    family-names: van der Ent
+    affiliation: Delft University of Technology
+    orcid: 'https://orcid.org/0000-0001-5450-4333'
+  - given-names: Jessica
+    family-names: Keune
+    affiliation: European Centre for Medium-Range Weather Forecasts
+    orcid: 
+  - given-names: Harald
+    family-names: Sodemann
+    affiliation: Geophysical Institute, University of Bergen
+    orcid:
+  - given-names: Jason P
+    family-names: Evans
+    affiliation: Climate Change Research Centre, University of New South Wales
+    orcid:
+  - given-names: Ru
+    family-names: Xu
+    affiliation: Institute of Botany, The Chinese Academy of Sciences
+    orcid:
+  - given-names: Andrea S
+    family-names: Taschetto
+    affiliation: Climate Change Research Centre, University of New South Wales
+    orcid:
+  - given-names: Chiara M
+    family-names: Holgate
+    affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
+    orcid:
+  - given-names: Albenis 
+    family-names: Pérez-Alarcón
+    affiliation: University of Vigo
+    orcid:
+  - given-names: SeungUk
+    family-names: Kim
+    affiliation: University of Illiniois Urbana-Champaign
+    orcid:
+  - given-names: Victoria M H
+    family-names: Deman
+    affiliation: Ghent University
+    orcid:
+  - given-names: Franziska
+    family-names: Aemisegger
+    affiliation: University of Bern
+    orcid:
+  - given-names: Marina
+    family-names: Duetsch
+    affiliation: University of Vienna
+    orcid:
+  - given-names: Jianhui
+    family-names: Wei
+    affiliation: Karlsruhe Institute of Technology
+    orcid:  
+  - given-names: Gerbrand 
+    family-names: Koren
+    affiliation: Utrecht University
+    orcid:  
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
@@ -49,7 +105,7 @@ abstract: >-
   source regions of precipitation from multiple models for a diverse set of hydrometeorological cases
   that are selected.
 keywords:
-  - moisture tracking models
+  - moisture tracking methods
   - intercomparison
   - uncertainty
   - python
