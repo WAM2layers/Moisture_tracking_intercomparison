@@ -70,6 +70,7 @@ def read_uvigo(basedir, casename):
             }
         )
     
+
 def read_utrack(basedir, casename):
     """Read data from UTRACK.
 
@@ -107,10 +108,8 @@ def read_utrack(basedir, casename):
             combine="nested",
             concat_dim="time",
         )["moisture_source"].sum("time")
-
  
     return xr.Dataset(ensemble) * n_gridcells_cases[casename]
-
 
 def read_ughent(basedir, casename):
     """Read data from university of Ghent.
@@ -156,13 +155,14 @@ def read_tracmass(basedir, casename):
         filename = "TRACMASS_diagnostics.nc"
     elif casename == "Scotland":
         filename = "TRACMASS_evap_sources_06-08oct2023.nc"  
-        
+
     print(f"Loading tracmass data for {casename}")
 
     nrdays = 15
     path = basedir / casename / "results TRACMASS Dipanjan Dey"
     ds = xr.open_dataset(path / filename)  # Evaporative sources (and preicp?) mm/day
     
+
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
     ds = ds.sortby(ds.lon)
@@ -193,7 +193,7 @@ def read_flexpart_tatfancheng(basedir, casename):
             date = "20231006-20231008"
         else:
             date = "20220222-20220228"
-        
+
         ensemble_members = ["Ens1", "Ens2", "Ens3"]
         ensemble = {}
         for member in ensemble_members:
@@ -219,6 +219,10 @@ def read_flexpart_xu(basedir, casename):
         filename = "aus_e_daily.nc"
         variable = "data"
         remap_vars = {}
+    elif casename == "Scotland":
+        filename = "scot_e_daily.nc"
+        variable = "data"
+        remap_vars = {}
 
     # Load, rename coords, select variable, and accumulate over time
     return (
@@ -233,7 +237,7 @@ def read_lagranto_chc(basedir, casename):
     """Read lagranto CHc data."""
     print(f"Loading CHc data for {casename}")
     path = basedir / casename / "results CHc LAGRANTO"
-    
+   
     if casename == "Pakistan":
         loncase = 180
         year = 2022
