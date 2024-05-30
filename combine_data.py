@@ -55,12 +55,20 @@ def read_uvigo(basedir, casename):
     print(f"Loading uvigo data for {casename}")
 
     path = basedir / casename / "results Uvigo"
-    return xr.Dataset(
-        {
-            "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
-            "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
-        }
-    )
+    if casename == "Scotland":
+        return xr.Dataset(
+            {
+                "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_Stohl_backwardreg.nc"),
+                "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_sodemann_reg.nc"),
+            }
+        )
+    else:
+        return xr.Dataset(
+            {
+                "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
+                "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+            }
+        )
 
 
 def read_utrack(basedir, casename):
@@ -99,7 +107,7 @@ def read_utrack(basedir, casename):
 
     if casename == "Pakistan":
         return xr.Dataset(ensemble) * n_gridcells_pakistan
-    elif casename == "Australia":
+    else:
         ds = xr.Dataset(ensemble)
         return ds * grid_cell_area(ds.lat, ds.lon) / 10**6
 
@@ -144,19 +152,17 @@ def read_tracmass(basedir, casename):
     if casename == "Australia":
         print("Skipping tracmass data for {casename} - not available")
         return xr.Dataset()
+    elif casename == "Pakistan":
+        filename = "TRACMASS_diagnostics.nc"
+    elif casename == "Scotland":
+        filename = "TRACMASS_evap_sources_06-08oct2023.nc"
+
     print(f"Loading tracmass data for {casename}")
 
     nrdays = 15
     path = basedir / casename / "results TRACMASS Dipanjan Dey"
 
-    ds = xr.open_dataset(
-        path / "TRACMASS_diagnostics.nc"
-    )  # Evaporative sources (and preicp?) mm/day
-
-    # Not used, but good to know it's available.
-    # ds_pr_TRACMASS = xr.open_dataset(
-    #     path / "PR_ERA5_TRACMASS.nc"
-    # )  # Precip ERA5 and TRACMASS Comparison
+    ds = xr.open_dataset(path / filename)  # Evaporative sources (and preicp?) mm/day
 
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
@@ -183,13 +189,15 @@ def read_flexpart_tatfancheng(basedir, casename):
 
         return ds.sortby(ds.lon).sum("time")["Cb"].rename("flexpart_tatfancheng")
 
-    elif casename == "Australia":
+    elif casename in ["Scotland", "Australia"]:
+        if casename == "Scotland":
+            date = "20231006-20231008"
+        else:
+            date = "20220222-20220228"
         ensemble_members = ["Ens1", "Ens2", "Ens3"]
         ensemble = {}
         for member in ensemble_members:
-            filename = (
-                f"WaterSip_moisture_source_Australia_20220222-20220228_{member}.nc"
-            )
+            filename = f"WaterSip_moisture_source_{casename}_{date}_{member}.nc"
             ds = xr.open_dataset(path / filename)
             # convert to -180 to 180 lon
             ds["lon"] = (ds["lon"] + 180) % 360 - 180
@@ -211,6 +219,10 @@ def read_flexpart_xu(basedir, casename):
         filename = "aus_e_daily.nc"
         variable = "data"
         remap_vars = {}
+    elif casename == "Scotland":
+        filename = "scot_e_daily.nc"
+        variable = "data"
+        remap_vars = {}
 
     # Load, rename coords, select variable, and accumulate over time
     return (
@@ -225,13 +237,18 @@ def read_lagranto_chc(basedir, casename):
     """Read lagranto CHc data."""
     print(f"Loading CHc data for {casename}")
     path = basedir / casename / "results CHc LAGRANTO"
-    filename = f"{casename}_2022_CHc_eventtotal_ens1.nc"
 
     if casename == "Pakistan":
         nlon = 1440
+        year = 2022
     elif casename == "Australia":
         nlon = 1441
+        year = 2022
+    elif casename == "Scotland":
+        nlon = 1441
+        year = 2023
 
+    filename = f"{casename}_{year}_CHc_eventtotal_ens1.nc"
     return (
         xr.open_dataset(path / filename)
         .rename(dimx_N="lon", dimy_N="lat")["N"]
@@ -288,8 +305,8 @@ def read_flexpart_uib(basedir, casename):
 
 def read_btrims(basedir, casename):
     """Read data for B-TrIMS."""
-    if casename == "Pakistan":
-        print("Skipping data for btrims, Pakistan - Unavailable")
+    if casename in ["Scotland", "Pakistan"]:
+        print(f"Skipping data for btrims, {casename} - Unavailable")
         return xr.Dataset()
     print(f"Loading btrims data for {casename}")
     path = basedir / casename / "results_B-TrIMS"
