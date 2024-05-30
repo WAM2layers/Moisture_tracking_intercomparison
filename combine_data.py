@@ -283,6 +283,9 @@ def read_flexpart_uib(basedir, casename):
 
 def read_btrims(basedir, casename):
     """Read data for B-TrIMS."""
+    if casename == "Pakistan":
+        print("Skipping data for btrims, Pakistan - Unavailable")
+        return xr.Dataset()
     print("Loading btrims data for {casename}")
     path = basedir / casename / "results_B-TrIMS"
 
