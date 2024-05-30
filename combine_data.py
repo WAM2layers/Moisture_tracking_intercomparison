@@ -57,8 +57,8 @@ def read_uvigo(basedir, casename):
     path = basedir / casename / "results Uvigo"
     return xr.Dataset(
         {
-            "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
-            "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+            "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
+            "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
         }
     )
 
