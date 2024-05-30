@@ -28,15 +28,15 @@ authors:
   - given-names: Victoria M H
     family-names: Deman
     affiliation: Ghent University
-    orcid:
+    orcid: 'https://orcid.org/0009-0002-0200-2408'
   - given-names: Marina
     family-names: Duetsch
     affiliation: University of Vienna
-    orcid:
+    orcid: 'https://orcid.org/0000-0002-1128-4198'
   - given-names: Jason P
     family-names: Evans
-    affiliation: Climate Change Research Centre, University of New South Wales
-    orcid:
+    affiliation: Climate Change Research Centre and ARC Centre of Excellence for Climate Extremes, University of New South Wales
+    orcid: 'https://orcid.org/0000-0003-1776-3429'
   - given-names: Chiara M
     family-names: Holgate
     affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
@@ -48,7 +48,7 @@ authors:
   - given-names: SeungUk
     family-names: Kim
     affiliation: University of Illiniois Urbana-Champaign
-    orcid:
+    orcid: 'https://orcid.org/0000-0001-7788-5298'
   - given-names: Gerbrand
     family-names: Koren
     affiliation: Utrecht University
@@ -56,19 +56,19 @@ authors:
   - given-names: Albenis 
     family-names: Pérez-Alarcón
     affiliation: University of Vigo
-    orcid:
+    orcid: 'https://orcid.org/0000-0002-9454-2331'
   - given-names: Harald
     family-names: Sodemann
     affiliation: Geophysical Institute, University of Bergen
-    orcid:
+    orcid: 'https://orcid.org/0000-0002-8167-0860'
   - given-names: Arie
     family-names: Staal
     affiliation: Utrecht University
     orcid: 'https://orcid.org/0000-0001-5409-1436'
   - given-names: Andrea S
     family-names: Taschetto
-    affiliation: Climate Change Research Centre, University of New South Wales
-    orcid:
+    affiliation: Climate Change Research Centre and ARC Centre of Excellence for Climate Extremes, University of New South Wales
+    orcid: 'https://orcid.org/0000-0001-6020-1603'
   - given-names: Ruud J
     family-names: van der Ent
     affiliation: Delft University of Technology
@@ -80,7 +80,7 @@ authors:
   - given-names: Ru
     family-names: Xu
     affiliation: Institute of Botany, The Chinese Academy of Sciences
-    orcid:
+    orcid: 'https://orcid.org/0000-0002-5203-5980'
 repository-code: 'https://github.com/WAM2layers/Moisture_tracking_intercomparison'
 abstract: >-
   We aim to assemble the diverse moisture tracking community 
