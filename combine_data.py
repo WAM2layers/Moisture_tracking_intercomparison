@@ -143,6 +143,7 @@ def read_tracmass(basedir, casename):
     """
     if casename == "Australia":
         print("Skipping tracmass data for {casename} - not available")
+        return xr.Dataset()
     print(f"Loading tracmass data for {casename}")
 
     nrdays = 15
@@ -276,8 +277,12 @@ def read_2ldrm(basedir, casename):
 def read_flexpart_uib(basedir, casename):
     """Read data for flexpart uib."""
     print(f"Loading UIB data for {casename}")
+    if casename in ["Scotland", "Australia"]:
+        print(f"Skipping UIB data for {casename} - not available")
+        return xr.Dataset()
+
     path = basedir / casename / "results UiB FLEXPART WaterSip"
-    filename = "Pakistan_2022_UiB_Sodemann_grid_EN1_regridded.nc"
+    filename = f"{casename}_2022_UiB_Sodemann_grid_EN1_regridded.nc"
     return xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
 
 
@@ -303,8 +308,9 @@ def read_btrims(basedir, casename):
             "latitude": (["latitude"], ds.latitude[:, 0].values),
             "longitude": (["longitude"], ds.longitude[0, :].values),
         },
-    )
+    )["wvcont_mm_daily"]
     ds.coords["longitude"] = (ds.coords["longitude"] + 180) % 360 - 180
+
     return (
         ds.sortby(ds.longitude)
         .rename(latitude="lat", longitude="lon")
