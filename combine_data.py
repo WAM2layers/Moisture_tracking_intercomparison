@@ -149,7 +149,7 @@ def read_tracmass(basedir, casename):
     Units in mm/day, so multiplied with # of event days.
     """
     if casename == "Australia":
-        print("Skipping tracmass data for {casename} - not available")
+        print(f"Skipping tracmass data for {casename} - not available")
         return xr.Dataset()
     elif casename == "Pakistan":
         filename = "TRACMASS_diagnostics.nc"
