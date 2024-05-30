@@ -69,7 +69,7 @@ def read_uvigo(basedir, casename):
                 "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
             }
         )
-
+    
 
 def read_utrack(basedir, casename):
     """Read data from UTRACK.
@@ -82,8 +82,12 @@ def read_utrack(basedir, casename):
     """
     print(f"Loading utrack data for {casename}")
     # TODO check units with Arie
-    n_gridcells_pakistan = (71 - 67) / 0.25 * (30 - 24) / 0.25
-
+    
+    n_gridcells_cases = {
+    	'Pakistan': (71 - 67) / 0.25 * (30 - 24) / 0.25,
+    	'Australia': (158 - 149) / 0.25 * (-22 - -32) / 0.25, 
+      	'Scotland': (-1 - -8) / 0.25 * (60 - 52) / 0.25  
+      	}  	
     path = basedir / casename / "results Utrack Arie Staal/"
 
     if casename == "Pakistan":
@@ -104,13 +108,8 @@ def read_utrack(basedir, casename):
             combine="nested",
             concat_dim="time",
         )["moisture_source"].sum("time")
-
-    if casename == "Pakistan":
-        return xr.Dataset(ensemble) * n_gridcells_pakistan
-    else:
-        ds = xr.Dataset(ensemble)
-        return ds * grid_cell_area(ds.lat, ds.lon) / 10**6
-
+ 
+    return xr.Dataset(ensemble) * n_gridcells_cases[casename]
 
 def read_ughent(basedir, casename):
     """Read data from university of Ghent.
@@ -155,14 +154,14 @@ def read_tracmass(basedir, casename):
     elif casename == "Pakistan":
         filename = "TRACMASS_diagnostics.nc"
     elif casename == "Scotland":
-        filename = "TRACMASS_evap_sources_06-08oct2023.nc"
+        filename = "TRACMASS_evap_sources_06-08oct2023.nc"  
 
     print(f"Loading tracmass data for {casename}")
 
     nrdays = 15
     path = basedir / casename / "results TRACMASS Dipanjan Dey"
-
     ds = xr.open_dataset(path / filename)  # Evaporative sources (and preicp?) mm/day
+    
 
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
@@ -194,6 +193,7 @@ def read_flexpart_tatfancheng(basedir, casename):
             date = "20231006-20231008"
         else:
             date = "20220222-20220228"
+
         ensemble_members = ["Ens1", "Ens2", "Ens3"]
         ensemble = {}
         for member in ensemble_members:
@@ -237,26 +237,27 @@ def read_lagranto_chc(basedir, casename):
     """Read lagranto CHc data."""
     print(f"Loading CHc data for {casename}")
     path = basedir / casename / "results CHc LAGRANTO"
-
+   
     if casename == "Pakistan":
-        nlon = 1440
+        loncase = 180
         year = 2022
     elif casename == "Australia":
-        nlon = 1441
+        loncase = 180.1
         year = 2022
     elif casename == "Scotland":
-        nlon = 1441
+        loncase = 180.1
         year = 2023
 
     filename = f"{casename}_{year}_CHc_eventtotal_ens1.nc"
-    return (
-        xr.open_dataset(path / filename)
+
+    ds = (xr.open_dataset(path / filename)
         .rename(dimx_N="lon", dimy_N="lat")["N"]
         .sum("time")
         .squeeze()
-        .assign_coords(lat=np.linspace(-90, 90, 721), lon=np.linspace(-180, 180, nlon))
-        .rename("lagranto_CHc")
-    )
+        .assign_coords(lat=np.arange(-90, 90.1, 0.25), lon=np.arange(-180, loncase, 0.25))
+        .rename("lagranto_CHc"))
+    
+    return  ds.isel(lon=slice(0,1440))
 
 
 def read_flexpart_univie(basedir, casename):
@@ -300,7 +301,10 @@ def read_flexpart_uib(basedir, casename):
 
     path = basedir / casename / "results UiB FLEXPART WaterSip"
     filename = f"{casename}_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    return xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
+    ds_flexpart_uib = xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
+    ds_flexpart_uib.coords['lon'] = (ds_flexpart_uib.coords['lon'] + 180) % 360 - 180
+    ds_flexpart_uib = ds_flexpart_uib.sortby(ds_flexpart_uib.lon)
+    return ds_flexpart_uib
 
 
 def read_btrims(basedir, casename):
@@ -350,14 +354,15 @@ def read_data(basedir, casename):
         [
             read_2ldrm(basedir, casename),
             read_flexpart_uib(basedir, casename),
+            read_flexpart_univie(basedir, casename)	,
             read_lagranto_chc(basedir, casename),
             read_flexpart_xu(basedir, casename),
             read_flexpart_tatfancheng(basedir, casename),
             read_tracmass(basedir, casename),
             read_ughent(basedir, casename),
             read_utrack(basedir, casename),
-            read_uvigo(basedir, casename),
             read_wam2layers(basedir, casename),
             read_btrims(basedir, casename),
+            read_uvigo(basedir, casename),
         ]
     )
