@@ -352,17 +352,17 @@ def read_data(basedir, casename):
 
     return xr.merge(
         [
+            read_wam2layers(basedir, casename),
             read_2ldrm(basedir, casename),
+            read_utrack(basedir, casename),
+            read_btrims(basedir, casename),
+            read_tracmass(basedir, casename),
+            read_ughent(basedir, casename),
             read_flexpart_uib(basedir, casename),
             read_flexpart_univie(basedir, casename)	,
             read_lagranto_chc(basedir, casename),
             read_flexpart_xu(basedir, casename),
             read_flexpart_tatfancheng(basedir, casename),
-            read_tracmass(basedir, casename),
-            read_ughent(basedir, casename),
-            read_utrack(basedir, casename),
-            read_wam2layers(basedir, casename),
-            read_btrims(basedir, casename),
             read_uvigo(basedir, casename),
         ]
     )
