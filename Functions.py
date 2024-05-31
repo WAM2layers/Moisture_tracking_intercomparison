@@ -1,5 +1,8 @@
 import numpy as np
-
+import cartopy.crs as crs
+import cartopy
+from cmocean import cm
+import matplotlib.pyplot as plt
 
 def grid_cell_area(latitude, longitude):
     """Return grid cell area"""
@@ -111,3 +114,145 @@ def get_grid_info_new(latitude, longitude):
     )  # [m] length southern boundary of a cell
     l_mid_gridcell = 0.5 * (l_n_gridcell + l_s_gridcell)
     return a_gridcell, l_ew_gridcell, l_mid_gridcell
+
+
+
+
+def get_models_names():
+
+
+    ens_names={
+            "wam2layers":"WAM2layers",
+            "Vigo_e1_Stohl":"UVigo E1",
+            "Vigo_e2_Sodemann": "UVigo E2",
+            "utrack_e1": "UTRACK E1",
+            "utrack_e2": "UTRACK E2",
+            "utrack_e3": "UTRACK E3",
+            "utrack_e4": "UTRACK E4",
+            "utrack_e5": "UTRACK E5",
+            "ghent_e1":"HASMTER E1",
+            "ghent_e2":"HASMTER E2",
+            "ghent_e3":"HASMTER E3",
+            "ghent_e4":"HASMTER E4",
+            "ghent_e5":"HASMTER E5",
+            "TRACMASS":"TRACMASS",
+            "flexpart_tatfancheng_Ens1":"FLEXPART-Watersip E1",
+            "flexpart_tatfancheng_Ens2":"FLEXPART-Watersip E2",
+            "flexpart_tatfancheng_Ens3":"FLEXPART-Watersip E3",
+            "flexpart_xu":"FLEXPART-Xu",
+            "lagranto_CHc":"Hc LAGRANTO",
+            "flexpart_univie":"FLEXPART_UViena",
+            "2ldrm":"2LDRM",
+    }
+
+
+    return ens_names
+
+
+
+
+def plotting_sources(ds_data, mask, ens_outputs, ens_names, figwidth=24, figheight=14, vmax=5, central_longitude=0, figrows=5, figcols=5, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
+
+
+    my_projection = crs.PlateCarree(central_longitude=central_longitude)
+    rows=figrows
+    cols=figcols
+    # Make figure
+    fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': crs.PlateCarree()},sharey=False)
+    i=0
+    j=0
+    for ens in ens_outputs:
+
+
+            print("------  Plotting", ens)
+
+            ds_data[ens].plot(ax=axs[i,j],vmin=0,vmax=vmax,robust=False,cmap=cm.rain,
+                        cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
+            axs[i,j].set_title(ens_names[ens], loc="left")
+            axs[i,j].contour(mask['lon'].values, mask['lat'].values, mask['mask'].values[0,:],colors=["r"])
+            axs[i,j].add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+            axs[i,j].add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
+
+            axs[i,j].set_xticks(np.arange(-180, 181, 20), crs=my_projection)
+            axs[i,j].set_yticks(np.arange(-90, 91, 10), crs=my_projection)
+            axs[i,j].set_xlim(map_lons_extend[0], map_lons_extend[1])
+            axs[i,j].set_ylim(map_lats_extend[0], map_lats_extend[1])
+
+            #Dismiss label of y-axis, except for left most column
+
+            if(j > 0):
+                axs[i,j].set_ylabel("")
+            else:
+                axs[i,j].set_ylabel("Latitude")
+
+
+            if i==rows-1:
+                axs[i,j].set_xlabel("Longitude")
+            else:
+                axs[i,j].set_xlabel("")
+
+            if j<cols-1:
+                    i=i
+                    j=j+1
+            else:
+                    i=i+1
+                    j=0
+
+
+    fig.savefig(fname,dpi=300,  bbox_inches="tight")
+
+
+
+
+def plotting_frac(ds_data, mask, ens_outputs, ens_names,  figwidth=24, figheight=14, vmax=0.02, central_longitude=0, figrows=5, figcols=5, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
+
+    for ens in ens_outputs:
+       vars()[ens+"_frac"] = calc_fractional_sources(ds_data[ens])
+
+
+    my_projection = crs.PlateCarree(central_longitude=central_longitude)
+    rows=figrows
+    cols=figcols
+    # Make figure
+    fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': crs.PlateCarree()},sharey=False)
+    i=0
+    j=0
+    for ens in ens_outputs:
+
+            print("------  Plotting frac", ens)
+
+            vars()[ens+"_frac"].plot(ax=axs[i,j],vmin=0,vmax=vmax,robust=False,cmap=cm.rain,
+                            cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
+            #srcs_wam2layers.plot.contour(ax=axs[0,0], levels=[0.1, 1], colors=["lightgrey", "grey"])
+            axs[i,j].set_title(ens_names[ens], loc="left")
+            axs[i,j].contour(mask['lon'].values, mask['lat'].values, mask['mask'].values[0,:], colors=["r"])
+            axs[i,j].add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+            axs[i,j].add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
+
+            axs[i,j].set_xticks(np.arange(-180, 181, 20), crs=my_projection)
+            axs[i,j].set_yticks(np.arange(-90, 91, 10), crs=my_projection)
+            axs[i,j].set_xlim(map_lons_extend[0], map_lons_extend[1])
+            axs[i,j].set_ylim(map_lats_extend[0], map_lats_extend[1])
+
+            #Dismiss label of y-axis, except for left most column
+
+            if(j > 0):
+                axs[i,j].set_ylabel("")
+            else:
+                axs[i,j].set_ylabel("Latitude")
+
+
+            if i==rows-1:
+                axs[i,j].set_xlabel("Longitude")
+            else:
+                axs[i,j].set_xlabel("")
+
+            if j<cols-1:
+                    i=i
+                    j=j+1
+            else:
+                    i=i+1
+                    j=0
+
+
+    fig.savefig(fname,dpi=300,  bbox_inches="tight")
