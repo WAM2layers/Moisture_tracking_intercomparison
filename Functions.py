@@ -81,3 +81,33 @@ def calc_regional_sources(
         sources_per_region = sources.weighted(weights).sum(dim=(lat_name, lon_name))
 
     return sources_per_region, weights
+
+# Get grid info
+def get_grid_info_new(latitude, longitude):
+    """Return grid cell area and lenght sides."""
+    dg = 111089.56  # [m] length of 1 degree latitude
+    erad = 6.371e6  # [m] Earth radius
+
+    gridcell = np.abs(longitude[1] - longitude[0])  # [degrees] grid cell size
+
+    # new area size calculation:
+    lat_n_bound = np.minimum(90.0, latitude + 0.5 * gridcell)
+    lat_s_bound = np.maximum(-90.0, latitude - 0.5 * gridcell)
+
+    a_gridcell = np.zeros([len(latitude), 1])
+    a_gridcell[:, 0] = (
+        (np.pi / 180.0)
+        * erad ** 2
+        * abs(np.sin(lat_s_bound * np.pi / 180.0) - np.sin(lat_n_bound * np.pi / 180.0))
+        * gridcell
+    )
+
+    l_ew_gridcell = gridcell * dg  # [m] length eastern/western boundary of a cell
+    l_n_gridcell = (
+        dg * gridcell * np.cos((latitude + gridcell / 2) * np.pi / 180)
+    )  # [m] length northern boundary of a cell
+    l_s_gridcell = (
+        dg * gridcell * np.cos((latitude - gridcell / 2) * np.pi / 180)
+    )  # [m] length southern boundary of a cell
+    l_mid_gridcell = 0.5 * (l_n_gridcell + l_s_gridcell)
+    return a_gridcell, l_ew_gridcell, l_mid_gridcell
