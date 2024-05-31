@@ -32,7 +32,7 @@ def read_wam2layers(basedir, casename):
         )["e_track"]
         .rename(latitude="lat", longitude="lon")
         .sum("time")
-        .rename("wam2layers")
+        .rename("WAM2layers")
     )
 
     if casename == "Pakistan":
@@ -58,15 +58,15 @@ def read_uvigo(basedir, casename):
     if casename == "Scotland":
         return xr.Dataset(
             {
-                "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_Stohl_backwardreg.nc"),
-                "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_sodemann_reg.nc"),
+                "FLEXPART-WaterSip (UVigo)": xr.open_dataarray(path / "ERA5_sodemann_reg.nc"),
+                "FLEXPART-Stohl (UVigo)": xr.open_dataarray(path / "ERA5_Stohl_backwardreg.nc"),
             }
         )
     else:
         return xr.Dataset(
             {
-                "Vigo_e1_Stohl": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
-                "Vigo_e2_Sodemann": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+                "FLEXPART-WaterSip (UVigo)": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+                "FLEXPART-Stohl (UVigo)": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
             }
         )
     
@@ -94,11 +94,11 @@ def read_utrack(basedir, casename):
         path = path / "moisture_tracking_intercomparsion"
 
     ensemble_members = {
-        "utrack_e1": path.glob("*_mixing48h_dt025h_100p.nc"),
-        "utrack_e2": path.glob("*_mixing24h_dt025h_100p.nc"),
-        "utrack_e3": path.glob("*_mixing12h_dt025h_100p.nc"),
-        "utrack_e4": path.glob("*_mixing24h_dt025h_1000p.nc"),
-        "utrack_e5": path.glob("*_mixing24h_dt010h_100p.nc"),
+        "UTrack Ens1": path.glob("*_mixing48h_dt025h_100p.nc"),
+        "UTrack Ens2": path.glob("*_mixing24h_dt025h_100p.nc"),
+        "UTrack Ens3": path.glob("*_mixing12h_dt025h_100p.nc"),
+        "UTrack Ens4": path.glob("*_mixing24h_dt025h_1000p.nc"),
+        "UTrack Ens5": path.glob("*_mixing24h_dt010h_100p.nc"),
     }
 
     ensemble = {}
@@ -125,11 +125,11 @@ def read_ughent(basedir, casename):
     filename_pattern = "bias_corrected_*_{ensemble}.nc"
 
     ensemble_members = {
-        "ghent_e1": "ens1_sod08",
-        "ghent_e2": "ens2_fas19",
-        "ghent_e3": "ens3_rh20",
-        "ghent_e4": "ens4_allabl",
-        "ghent_e5": "ens5_rhadap80",
+        "FLEXPART-HAMSTER Ens1": "ens1_sod08",
+        "FLEXPART-HAMSTER Ens2": "ens2_fas19",
+        "FLEXPART-HAMSTER Ens3": "ens3_rh20",
+        "FLEXPART-HAMSTER Ens4": "ens4_allabl",
+        "FLEXPART-HAMSTER Ens5": "ens5_rhadap80",
     }
 
     ensemble = {}
@@ -186,7 +186,7 @@ def read_flexpart_tatfancheng(basedir, casename):
         # convert to -180 to 180 lon
         ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
 
-        return ds.sortby(ds.lon).sum("time")["Cb"].rename("flexpart_tatfancheng")
+        return ds.sortby(ds.lon).sum("time")["Cb"].rename("FLEXPART-WaterSip (TFC)")
 
     elif casename in ["Scotland", "Australia"]:
         if casename == "Scotland":
@@ -201,7 +201,7 @@ def read_flexpart_tatfancheng(basedir, casename):
             ds = xr.open_dataset(path / filename)
             # convert to -180 to 180 lon
             ds["lon"] = (ds["lon"] + 180) % 360 - 180
-            ensemble[f"flexpart_tatfancheng_{member}"] = ds.sortby(ds.lon)["Cb"]
+            ensemble[f"FLEXPART-WaterSip (TFC) {member}"] = ds.sortby(ds.lon)["Cb"]
 
         return xr.Dataset(ensemble)
 
@@ -229,7 +229,7 @@ def read_flexpart_xu(basedir, casename):
         xr.open_dataset(path / filename)[variable]
         .rename(remap_vars)
         .sum("time")
-        .rename("flexpart_xu")
+        .rename("FLEXPART-WaterSip (Xu)")
     )
 
 
@@ -255,7 +255,7 @@ def read_lagranto_chc(basedir, casename):
         .sum("time")
         .squeeze()
         .assign_coords(lat=np.arange(-90, 90.1, 0.25), lon=np.arange(-180, loncase, 0.25))
-        .rename("lagranto_CHc"))
+        .rename("LAGRANTO-WaterSip (CHc)"))
     
     return  ds.isel(lon=slice(0,1440))
 
@@ -269,7 +269,7 @@ def read_flexpart_univie(basedir, casename):
     ds = xr.open_dataset(path / filename).sum("time")
     combined = ds["moisture_uptakes_bl"] + ds["moisture_uptakes_ft"]
 
-    return combined.rename("flexpart_univie")
+    return combined.rename("FLEXPART-WaterSip (UniVie)")
 
 
 def read_2ldrm(basedir, casename):
@@ -282,7 +282,7 @@ def read_2ldrm(basedir, casename):
         xr.open_dataset(path / filename)
         .rename(latitude="lat", longitude="lon")["moisture_source"]
         .sum("time")
-        .T.rename("2ldrm")
+        .T.rename("2LDRM")
     )
 
     if casename == "Australia":
@@ -301,7 +301,7 @@ def read_flexpart_uib(basedir, casename):
 
     path = basedir / casename / "results UiB FLEXPART WaterSip"
     filename = f"{casename}_2022_UiB_Sodemann_grid_EN1_regridded.nc"
-    ds_flexpart_uib = xr.open_dataset(path / filename)["moisture_uptakes"].rename("flexpart_uib")
+    ds_flexpart_uib = xr.open_dataset(path / filename)["moisture_uptakes"].rename("FLEXPART-WaterSip (UiB)")
     ds_flexpart_uib.coords['lon'] = (ds_flexpart_uib.coords['lon'] + 180) % 360 - 180
     ds_flexpart_uib = ds_flexpart_uib.sortby(ds_flexpart_uib.lon)
     return ds_flexpart_uib
