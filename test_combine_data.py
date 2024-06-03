@@ -11,7 +11,7 @@ It assumes data is stored in ../Pakistan
 
 from pathlib import Path
 from combine_data import (
-    read_data_pakistan,
+    read_data,
     read_flexpart_univie,
     read_lagranto_chc,
     read_flexpart_xu,
@@ -29,10 +29,10 @@ from combine_data import (
 def test_read_data_pakistan():
     """Check if function completes with no error."""
     # Assume data is stored relative to this file like so:
-    folder = "../Pakistan/"
+    folder = "../"
 
     # Test data read function
-    read_data_pakistan(folder, "Pakistan")
+    read_data(folder, "Pakistan")
 
 
 def test_individual_datasets():
@@ -50,3 +50,6 @@ def test_individual_datasets():
         read_btrims(basedir, casename)
         read_ughent(basedir, casename)
         read_2ldrm(basedir, casename)
+
+        
+test_read_data_pakistan()
