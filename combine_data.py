@@ -55,20 +55,12 @@ def read_uvigo(basedir, casename):
     print(f"Loading uvigo data for {casename}")
 
     path = basedir / casename / "results Uvigo"
-    if casename == "Scotland":
-        return xr.Dataset(
-            {
-                "FLEXPART-WaterSip (UVigo)": xr.open_dataarray(path / "ERA5_sodemann_reg.nc"),
-                "FLEXPART-Stohl (UVigo)": xr.open_dataarray(path / "ERA5_Stohl_backwardreg.nc"),
-            }
-        )
-    else:
-        return xr.Dataset(
-            {
-                "FLEXPART-WaterSip (UVigo)": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
-                "FLEXPART-Stohl (UVigo)": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
-            }
-        )
+    return xr.Dataset(
+       {
+       "FLEXPART-LATTIN (UVigo)": xr.open_dataarray(path / "ERA5_APA22_reg.nc"),
+       "FLEXPART-Stohl (UVigo)": xr.open_dataarray(path / "ERA5_SJ05_reg.nc"),
+        }
+     )
     
 
 def read_utrack(basedir, casename):
