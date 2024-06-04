@@ -3,6 +3,9 @@ import cartopy.crs as crs
 import cartopy
 from cmocean import cm
 import matplotlib.pyplot as plt
+from cartopy.mpl.ticker import LongitudeFormatter
+import matplotlib.ticker as mticker
+import xarray as xr
 
 def grid_cell_area(latitude, longitude):
     """Return grid cell area"""
@@ -185,3 +188,206 @@ def plotting_sources(ds_data, mask, ens_names, casename, figwidth=24, figheight=
         plt.axis("off")
 
     fig.savefig(fname, dpi=300,  bbox_inches="tight")
+
+
+def plotting_sources_cases(ds_data, mask, ens_names, figwidth=24, figheight=14, vmax=5, central_longitude=0, figrows=5, figcols=5, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
+
+
+    my_projection = crs.PlateCarree(central_longitude=central_longitude)
+    rows=figrows
+    cols=figcols
+    # Make figure
+    fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': my_projection})
+    i=0
+    j=0
+    for iens, ens in enumerate(ens_names):
+
+
+            print("------  Plotting", ens)
+
+            ds_data[ens].plot(ax=axs[i,j],vmin=0,vmax=vmax,robust=False,cmap=cm.rain,transform = crs.PlateCarree(),extend="max",
+                        cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
+            axs[i,j].set_title(ens, loc="left")
+
+
+            if len(mask['mask'].values.shape)>2:
+                maskvals=mask['mask'].values[0,:]
+            else:
+                maskvals=mask['mask'].values
+
+            axs[i,j].contour(mask['lon'].values, mask['lat'].values, maskvals ,colors=["r"],transform = crs.PlateCarree())
+            axs[i,j].add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+            axs[i,j].add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
+
+
+            if central_longitude==0:
+                lons_ticks=np.arange(-180, 181, 20)
+            else:
+                lons_ticks=np.arange(0, 361, 20)
+
+            axs[i,j].set_xticks(lons_ticks, crs=crs.PlateCarree())
+            axs[i,j].set_yticks(np.arange(-90, 91, 10), crs=crs.PlateCarree())
+
+
+            lon_formatter = LongitudeFormatter(direction_label=False, degree_symbol='')
+            axs[i,j].xaxis.set_major_formatter(lon_formatter)
+            fig.axes[iens].set_extent([map_lons_extend[0], map_lons_extend[1], map_lats_extend[0], map_lats_extend[1]],crs.PlateCarree())
+
+            #Dismiss label of y-axis, except for left most column
+
+            if(j > 0):
+                axs[i,j].set_ylabel("")
+            else:
+                axs[i,j].set_ylabel("Latitude")
+
+
+            if i==rows-1:
+                axs[i,j].set_xlabel("Longitude")
+            else:
+                axs[i,j].set_xlabel("")
+
+            if j<cols-1:
+                    i=i
+                    j=j+1
+            else:
+                    i=i+1
+                    j=0
+
+
+    fig.savefig(fname,dpi=300,  bbox_inches="tight")
+    plt.close()
+
+
+
+def plotting_sources_one_case(ds_data, mask, ens_names, figwidth=24, figheight=14, vmax=5, central_longitude=0, figrows=1, figcols=1, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
+
+
+    my_projection = crs.PlateCarree(central_longitude=central_longitude)
+    rows=figrows
+    cols=figcols
+    # Make figure
+
+
+    for iens, ens in enumerate(ens_names):
+            fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': my_projection})
+
+            print("------  Plotting", ens)
+
+            ds_data[ens].plot(ax=axs,vmin=0,vmax=vmax,robust=False,cmap=cm.rain,transform = crs.PlateCarree(), extend="max",
+                        cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
+            axs.set_title(ens, loc="left")
+
+
+            if len(mask['mask'].values.shape)>2:
+                maskvals=mask['mask'].values[0,:]
+            else:
+                maskvals=mask['mask'].values
+
+            axs.contour(mask['lon'].values, mask['lat'].values, maskvals ,colors=["r"],transform = crs.PlateCarree())
+            axs.add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+            axs.add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
+
+
+            if central_longitude==0:
+                lons_ticks=np.arange(-180, 181, 20)
+            else:
+                lons_ticks=np.arange(0, 361, 20)
+
+            axs.set_xticks(lons_ticks, crs=crs.PlateCarree())
+            axs.set_yticks(np.arange(-90, 91, 10), crs=crs.PlateCarree())
+
+
+            lon_formatter = LongitudeFormatter(direction_label=False, degree_symbol='')
+            axs.xaxis.set_major_formatter(lon_formatter)
+            fig.axes[0].set_extent([map_lons_extend[0], map_lons_extend[1], map_lats_extend[0], map_lats_extend[1]],crs.PlateCarree())
+
+            #Dismiss label of y-axis, except for left most column
+
+
+
+            axs.set_ylabel("Latitude")
+            axs.set_xlabel("Longitude")
+
+            fig.savefig(fname+"_"+ens+".png",dpi=300,  bbox_inches="tight")
+            plt.close()
+
+
+def plotting_global(means, cases, cmaps, vmaxs, masks, plot_vline, proj, fname):
+
+	prj = crs.PlateCarree()
+	## Robinson Projection
+	if proj==1:
+		prjr = crs.PlateCarree(central_longitude=70) #crs.Robinson(central_longitude=70)
+	elif proj==2:
+		prjr = crs.Robinson(central_longitude=70)
+	else:
+		print("Only proj=1 and proj=2 are allowed")
+		quit()
+	fig, ax = plt.subplots(figsize=(14,10), subplot_kw={'projection':prjr})
+
+	ax1 = fig.add_subplot(131)
+	ax1.set_axis_off()
+	ax2 = fig.add_subplot(132)
+	ax2.set_axis_off()
+	ax3 = fig.add_subplot(133)
+	ax3.set_axis_off()
+
+
+	axs=[ax1, ax2, ax3]
+
+	ax.add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+
+
+
+	for i, case in enumerate(cases):
+		print("-----> Plotting", case)
+
+		mask=xr.open_dataset(case+'/'+masks[case])
+
+		values=means[case].values
+		values[values<=0.25]=np.nan
+
+		means[case][:,:]=values
+
+		vars()["p_"+case]=means[case].plot.contourf(ax=ax,levels=np.arange(0, vmaxs[i] + int(vmaxs[i]/5), int(vmaxs[i]/5)), extend='max',
+					cmap = cmaps[i],
+					transform=prj,
+					add_colorbar=False,
+					)
+
+
+		fig.colorbar(vars()["p_"+case], ax=axs[i],  pad=0.05, orientation='horizontal', label="mm")
+
+		#axs[i].set_title(case+" case")
+
+		if len(mask['mask'].values.shape)>2:
+			maskvals=mask['mask'].values[0,:]
+		else:
+			maskvals=mask['mask'].values
+
+		ax.contour(mask['lon'].values, mask['lat'].values, maskvals, colors=["r"],transform = prj)
+
+
+
+
+	gl = ax.gridlines(draw_labels=True, linewidth=0)
+	gl.top_labels = False
+	gl.right_labels = False
+
+	if proj==1:
+
+		if plot_vline:
+			ax.axvline(-50, color="gray", linewidth=1)
+			ax.axvline(50, color="gray", linewidth=1)
+
+		ax.set_extent([-80,230,-60,80], crs=prj)
+		glons=[-80, -60, -40, -20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, -160, -140]
+		gl.xlocator =  mticker.FixedLocator(glons)
+
+
+	if proj==2:
+		plt.subplots_adjust(bottom=-0.01)
+
+
+	fig.savefig(fname, dpi=300, bbox_inches="tight")
+	plt.close()
