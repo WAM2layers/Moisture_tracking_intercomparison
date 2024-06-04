@@ -115,109 +115,73 @@ def get_grid_info_new(latitude, longitude):
     l_mid_gridcell = 0.5 * (l_n_gridcell + l_s_gridcell)
     return a_gridcell, l_ew_gridcell, l_mid_gridcell
 
+def plot_single_map(ax, data, mask, title, map_lons_extend, map_lats_extend, vmax=5, xlabel="Longitude", ylabel="Latitude"):
 
-def plotting_sources(ds_data, mask, ens_names, figwidth=24, figheight=14, vmax=5, central_longitude=0, figrows=5, figcols=5, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
+    data.plot(ax=ax,vmin=0,vmax=vmax,robust=False,cmap=cm.rain,
+              cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
+    ax.set_title(title, loc="left")
+    ax.contour(mask['lon'].values, mask['lat'].values, np.squeeze(mask['mask'].values),colors=["r"])
+    ax.add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
+    ax.add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
 
+    ax.set_xticks(np.arange(-180, 181, 20))
+    ax.set_yticks(np.arange(-90, 91, 10))
+    ax.set_xlim(map_lons_extend[0], map_lons_extend[1])
+    ax.set_ylim(map_lats_extend[0], map_lats_extend[1])
 
-    my_projection = crs.PlateCarree(central_longitude=central_longitude)
-    rows=figrows
-    cols=figcols
-    # Make figure
-    fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': crs.PlateCarree()},sharey=False)
-    i=0
-    j=0
-    for ens in ens_names:
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
 
+def plotting_sources(ds_data, mask, ens_names, casename, figwidth=24, figheight=14, vmax=5, central_longitude=0, figrows=5, figcols=5, map_lons_extend=None, map_lats_extend=None, fname="fig"):
 
-            print("------  Plotting", ens)
+    # set map extent if it is not set
+    if map_lons_extend is None:
+        if casename == "Pakistan":
+            map_lons_extend = [0, 140]
+        elif casename == "Scotland":
+            map_lons_extend = [-85, 40]
+        elif casename == "Australia":
+            map_lons_extend = [120, 240]
 
-            ds_data[ens].plot(ax=axs[i,j],vmin=0,vmax=vmax,robust=False,cmap=cm.rain,
-                        cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
-            axs[i,j].set_title(ens, loc="left")
-            axs[i,j].contour(mask['lon'].values, mask['lat'].values, mask['mask'].values[0,:],colors=["r"])
-            axs[i,j].add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
-            axs[i,j].add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
-
-            axs[i,j].set_xticks(np.arange(-180, 181, 20), crs=my_projection)
-            axs[i,j].set_yticks(np.arange(-90, 91, 10), crs=my_projection)
-            axs[i,j].set_xlim(map_lons_extend[0], map_lons_extend[1])
-            axs[i,j].set_ylim(map_lats_extend[0], map_lats_extend[1])
-
-            #Dismiss label of y-axis, except for left most column
-
-            if(j > 0):
-                axs[i,j].set_ylabel("")
-            else:
-                axs[i,j].set_ylabel("Latitude")
-
-
-            if i==rows-1:
-                axs[i,j].set_xlabel("Longitude")
-            else:
-                axs[i,j].set_xlabel("")
-
-            if j<cols-1:
-                    i=i
-                    j=j+1
-            else:
-                    i=i+1
-                    j=0
-
-
-    fig.savefig(fname,dpi=300,  bbox_inches="tight")
-
-
-
-
-def plotting_frac(ds_data, mask, ens_names,  figwidth=24, figheight=14, vmax=0.02, central_longitude=0, figrows=5, figcols=5, map_lons_extend=[-85, 40], map_lats_extend=[10,80], fname="fig"):
-
-    for ens in ens_names:
-       vars()[ens+"_frac"] = calc_fractional_sources(ds_data[ens])
-
+    if map_lats_extend is None:
+        if casename == "Pakistan":
+            map_lats_extend = [-40,50]
+        elif casename == "Scotland":
+            map_lats_extend = [10, 80]
+        elif casename == "Australia":
+            map_lats_extend = [-65, 10]
 
     my_projection = crs.PlateCarree(central_longitude=central_longitude)
-    rows=figrows
-    cols=figcols
+
     # Make figure
-    fig, axs = plt.subplots(rows, cols, figsize=(figwidth, figheight),subplot_kw={'projection': crs.PlateCarree()},sharey=False)
-    i=0
-    j=0
-    for ens in ens_names:
+    fig, axs = plt.subplots(figrows, figcols, figsize=(figwidth, figheight),subplot_kw={'projection': crs.PlateCarree()},sharey=False)
 
-            print("------  Plotting frac", ens)
+    for n,ens in enumerate(ens_names):
 
-            vars()[ens+"_frac"].plot(ax=axs[i,j],vmin=0,vmax=vmax,robust=False,cmap=cm.rain,
-                            cbar_kwargs=dict(fraction=0.05, shrink=0.5,label=None),)
-            #srcs_wam2layers.plot.contour(ax=axs[0,0], levels=[0.1, 1], colors=["lightgrey", "grey"])
-            axs[i,j].set_title(ens, loc="left")
-            axs[i,j].contour(mask['lon'].values, mask['lat'].values, mask['mask'].values[0,:], colors=["r"])
-            axs[i,j].add_feature(cartopy.feature.COASTLINE, linewidth=0.8)
-            axs[i,j].add_feature(cartopy.feature.BORDERS, linestyle='-', linewidth=.2)
+        print("------  Plotting", ens)
 
-            axs[i,j].set_xticks(np.arange(-180, 181, 20), crs=my_projection)
-            axs[i,j].set_yticks(np.arange(-90, 91, 10), crs=my_projection)
-            axs[i,j].set_xlim(map_lons_extend[0], map_lons_extend[1])
-            axs[i,j].set_ylim(map_lats_extend[0], map_lats_extend[1])
+        i = n//figcols
+        j = n%figcols
 
-            #Dismiss label of y-axis, except for left most column
+        # Dismiss label of y-axis, except for left most column
+        if(j > 0):
+            ylabel=""
+        else:
+            ylabel="Latitude"
 
-            if(j > 0):
-                axs[i,j].set_ylabel("")
-            else:
-                axs[i,j].set_ylabel("Latitude")
+        # Dismiss label of x-axis except for bottom row
+        if(i < figrows-1):
+            xlabel=""
+        else:
+            xlabel="Longitude"
 
+        plot_single_map(axs[i,j], ds_data[ens], mask, ens, map_lons_extend, map_lats_extend, vmax=vmax, xlabel=xlabel, ylabel=ylabel)
 
-            if i==rows-1:
-                axs[i,j].set_xlabel("Longitude")
-            else:
-                axs[i,j].set_xlabel("")
+    # Remove axes from empty subplots
+    for n in range(len(ens_names), figrows*figcols):
+        i = n//figcols
+        j = n%figcols
+        plt.sca(axs[i,j])
+        plt.axis("off")
 
-            if j<cols-1:
-                    i=i
-                    j=j+1
-            else:
-                    i=i+1
-                    j=0
-
-
-    fig.savefig(fname,dpi=300,  bbox_inches="tight")
+    fig.savefig(fname, dpi=300,  bbox_inches="tight")
