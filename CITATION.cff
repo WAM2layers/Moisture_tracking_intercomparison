@@ -19,16 +19,24 @@ authors:
   - given-names: Jessica
     family-names: Keune
     affiliation: European Centre for Medium-Range Weather Forecasts
-    orcid:
+    orcid: 'https://orcid.org/0000-0001-6104-2165'
 # from here one alphabetically (can of course be changed in case of significant contributions)
   - given-names: Franziska
     family-names: Aemisegger
     affiliation: University of Bern
     orcid: 'https://orcid.org/0000-0002-4022-9825'
+  - given-names: Alfredo
+    family-names: Crespo-Otero
+    affiliation: University of Santiago de Compostela
+    orcid: 'https://orcid.org/0009-0009-6032-0827'
   - given-names: Victoria M H
     family-names: Deman
     affiliation: Ghent University
     orcid: 'https://orcid.org/0009-0002-0200-2408'
+  - given-names: Andries Jan
+    family-names: de Vries
+    affiliation: University of Lausanne
+    orcid: 'https://orcid.org/0000-0002-1175-6474'
   - given-names: Marina
     family-names: Duetsch
     affiliation: University of Vienna
@@ -41,6 +49,10 @@ authors:
     family-names: Holgate
     affiliation: Australian National University, ARC Centre of Excellence for Climate Extremes
     orcid: 'https://orcid.org/0000-0002-3645-2856'
+  - given-names: Damián
+    family-names: Insua-Costa
+    affiliation: Ghent University
+    orcid: ''
   - given-names: Peter
     family-names: Kalverla
     affiliation: Netherlands eScience Center
@@ -69,6 +81,10 @@ authors:
     family-names: Taschetto
     affiliation: Climate Change Research Centre and ARC Centre of Excellence for Climate Extremes, University of New South Wales
     orcid: 'https://orcid.org/0000-0001-6020-1603'
+  - given-names: Iris 
+    family-names: Thurnherr
+    affiliation: ETH Zürich
+    orcid: 'https://orcid.org/0000-0003-3647-0373'
   - given-names: Ruud J
     family-names: van der Ent
     affiliation: Delft University of Technology
