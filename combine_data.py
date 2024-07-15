@@ -14,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 import xarray as xr
+import glob
 
 from Functions import grid_cell_area
 
@@ -141,20 +142,20 @@ def read_tracmass(basedir, casename):
     Units in mm/day, so multiplied with # of event days.
     """
     if casename == "Australia":
-        print(f"Skipping tracmass data for {casename} - not available")
-        return xr.Dataset()
+        filename = "TRACMASS_evap_sources_22-28feb2022.nc"
+        nrdays = 7
     elif casename == "Pakistan":
         filename = "TRACMASS_diagnostics.nc"
+        nrdays = 15
     elif casename == "Scotland":
         filename = "TRACMASS_evap_sources_06-08oct2023.nc"  
+        nrdays = 3
 
     print(f"Loading tracmass data for {casename}")
 
-    nrdays = 15
     path = basedir / casename / "results TRACMASS Dipanjan Dey"
     ds = xr.open_dataset(path / filename)  # Evaporative sources (and preicp?) mm/day
     
-
     # convert to -180 to 180 lon
     ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
     ds = ds.sortby(ds.lon)
@@ -171,31 +172,23 @@ def read_flexpart_tatfancheng(basedir, casename):
     print(f"Loading tatfancheng data for {casename}")
     path = basedir / casename / "results FLEXPART_WaterSip_TatFanCheng"
 
-    if casename == "Pakistan":
-        filename = "WaterSip_Cb_20220810-20220824_Pakistan_box.nc"
+    if casename == "Scotland":
+        date = "20231006-20231008"
+    elif casename == "Australia":
+        date = "20220222-20220228"
+    else:
+        date = "20220810-20220824"
+
+    ensemble_members = ["Ens1", "Ens2", "Ens3"]
+    ensemble = {}
+    for member in ensemble_members:
+        filename = f"WaterSip_moisture_source_{casename}_{date}_{member}.nc"
         ds = xr.open_dataset(path / filename)
-
         # convert to -180 to 180 lon
-        ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
+        ds["lon"] = (ds["lon"] + 180) % 360 - 180
+        ensemble[f"FLEXPART-WaterSip (TFC) {member}"] = ds.sortby(ds.lon)["Cb"]
 
-        return ds.sortby(ds.lon).sum("time")["Cb"].rename("FLEXPART-WaterSip (TFC)")
-
-    elif casename in ["Scotland", "Australia"]:
-        if casename == "Scotland":
-            date = "20231006-20231008"
-        else:
-            date = "20220222-20220228"
-
-        ensemble_members = ["Ens1", "Ens2", "Ens3"]
-        ensemble = {}
-        for member in ensemble_members:
-            filename = f"WaterSip_moisture_source_{casename}_{date}_{member}.nc"
-            ds = xr.open_dataset(path / filename)
-            # convert to -180 to 180 lon
-            ds["lon"] = (ds["lon"] + 180) % 360 - 180
-            ensemble[f"FLEXPART-WaterSip (TFC) {member}"] = ds.sortby(ds.lon)["Cb"]
-
-        return xr.Dataset(ensemble)
+    return xr.Dataset(ensemble)
 
 
 def read_flexpart_xu(basedir, casename):
@@ -205,21 +198,14 @@ def read_flexpart_xu(basedir, casename):
 
     if casename == "Pakistan":
         filename = "e_daily.nc"
-        variable = "variable"
-        remap_vars = dict(latitude="lat", longitude="lon")
     elif casename == "Australia":
         filename = "aus_e_daily.nc"
-        variable = "data"
-        remap_vars = {}
     elif casename == "Scotland":
         filename = "scot_e_daily.nc"
-        variable = "data"
-        remap_vars = {}
 
     # Load, rename coords, select variable, and accumulate over time
     return (
-        xr.open_dataset(path / filename)[variable]
-        .rename(remap_vars)
+        xr.open_dataset(path / filename)["data"]
         .sum("time")
         .rename("FLEXPART-WaterSip (Xu)")
     )
@@ -287,12 +273,12 @@ def read_2ldrm(basedir, casename):
 def read_flexpart_uib(basedir, casename):
     """Read data for flexpart uib."""
     print(f"Loading UIB data for {casename}")
-    if casename in ["Scotland", "Australia"]:
-        print(f"Skipping UIB data for {casename} - not available")
-        return xr.Dataset()
+    if casename in ["Pakistan", "Australia"]:
+        filename = f"{casename}_2022_UiB_Sodemann_grid_EN0_regridded.nc"
+    elif casename == "Scotland":
+        filename = f"{casename}_2023_UiB_Sodemann_grid_EN0_regridded.nc"
 
     path = basedir / casename / "results UiB FLEXPART WaterSip"
-    filename = f"{casename}_2022_UiB_Sodemann_grid_EN1_regridded.nc"
     ds_flexpart_uib = xr.open_dataset(path / filename)["moisture_uptakes"].rename("FLEXPART-WaterSip (UiB)")
     ds_flexpart_uib.coords['lon'] = (ds_flexpart_uib.coords['lon'] + 180) % 360 - 180
     ds_flexpart_uib = ds_flexpart_uib.sortby(ds_flexpart_uib.lon)
@@ -301,27 +287,21 @@ def read_flexpart_uib(basedir, casename):
 
 def read_btrims(basedir, casename):
     """Read data for B-TrIMS."""
-    if casename in ["Scotland", "Pakistan"]:
-        print(f"Skipping data for btrims, {casename} - Unavailable")
-        return xr.Dataset()
     print(f"Loading btrims data for {casename}")
-    path = basedir / casename / "results_B-TrIMS"
+    folder = "results_B-TrIMS" if casename == "Australia" else "results B-TrIMS"
+    path = basedir / casename / folder
 
-    # TODO check this and refactor such that dates are not case dependent.
-    for day in range(22, 29):
-        ds = xr.open_dataset(path / f"bt.202202_{day:02d}_processed.nc")
-        if day == 22:
-            ods = ds.wvcont_mm_daily
-        else:
-            ods += ds.wvcont_mm_daily
+    file_pattern = path / f'bt.*.nc'
+    files = sorted([f for f in glob.glob(str(file_pattern))])
+    ds = xr.open_mfdataset(files, concat_dim="time", combine='nested').sum(dim="time")
 
     ds = xr.Dataset(
-        data_vars={"wvcont_mm_daily": (["latitude", "longitude"], ods.values)},
+        data_vars={"wvcont": (["latitude", "longitude"], ds.wvcont.values)},
         coords={
-            "latitude": (["latitude"], ds.latitude[:, 0].values),
-            "longitude": (["longitude"], ds.longitude[0, :].values),
+            "latitude": (["latitude"], ds.latitude.values),
+            "longitude": (["longitude"], ds.longitude.values),
         },
-    )["wvcont_mm_daily"]
+    )["wvcont"]
     ds.coords["longitude"] = (ds.coords["longitude"] + 180) % 360 - 180
 
     return (
