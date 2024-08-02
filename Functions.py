@@ -387,15 +387,17 @@ def plot_abs_regional(all_maps_regional,csv_wrf_wvt,precip_sums,precip_era5,list
         texty=338
         ylimx=350
         leg2h=0.54
+        length=15*24
     elif case=='Scotland':
         texty=41
         ylimx=42.5
         leg2h=0.71
+        length=3*24
     elif case=='Australia':
         texty=156
         ylimx=162
         leg2h=0.6
-    
+        length=7*24  
         
     n_lines = len(srcs_regional_combined['region'])
     cmap = mpl.colormaps['RdYlBu_r']
@@ -426,13 +428,16 @@ def plot_abs_regional(all_maps_regional,csv_wrf_wvt,precip_sums,precip_era5,list
     
     for nn,mname in enumerate(modelnames):
         if mname in precip_era5:
-            ax.hlines(precip_era5[mname].sum().values,nn-0.3,nn+0.3,color='k',linestyle=':',linewidth=3.0)
-            #print(precip_pakistan['B-TrIMS'].sum().values/precip_sums2[nn]*100)
-            ax.text(nn,texty,"{:.0f}".format(precip_sums[nn]/precip_era5[mname].sum().values*100)+'%',ha='center')
+            if mname=='UTrack Ens2':
+                pr_sum=precip_era5[mname][:length].sum().values
+            else:
+                pr_sum=precip_era5[mname].sum().values
+            ax.hlines(pr_sum,nn-0.3,nn+0.3,color='k',linestyle=':',linewidth=3.0)
+            ax.text(nn,texty,"{:.0f}".format(precip_sums[nn]/pr_sum*100)+'%',ha='center')
             if mname=='FLEXPART-LATTIN (UVigo)':
                 nn=len(modelnames)-1
-                ax2.hlines(precip_era5[mname].sum().values,nn-0.3,nn+0.3,color='k',linestyle=':',linewidth=3.0,label='ERA5 precipitation')
-                ax.text(nn,texty,"{:.0f}".format(precip_sums[nn]/precip_era5[mname].sum().values*100)+'%',ha='center')
+                ax2.hlines(pr_sum,nn-0.3,nn+0.3,color='k',linestyle=':',linewidth=3.0,label='ERA5 precipitation')
+                ax.text(nn,texty,"{:.0f}".format(precip_sums[nn]/pr_sum*100)+'%',ha='center')
     
     ax.axvline(x=len(modelnames)-1.5,color='grey',linestyle='--',linewidth=2.0)
     

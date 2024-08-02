@@ -413,7 +413,7 @@ def read_precip_era5(basedir, casename, exclude):
                 A[name]=A[name].sum(['lon','lat'])
             else: 
                 A[name]=xr.open_dataset(path+filename,decode_times=True)[variable]
-
+                
     
     return (
         A
