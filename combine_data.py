@@ -46,9 +46,15 @@ def read_wam2layers(basedir, casename):
 
 
 def read_wrf_wvt(basedir, casename):
-    print(
-        "Skipping wrf_wvt data for {casename} as it is not available in gridded form."
-    )
+    """Read data from WRF-WVT"""
+    print(f"Loading WRF-WVT data for {casename}")
+
+    path = basedir / casename / "results WRF-WVT"
+    filename = casename+"Case_Final.nc"
+    ds = xr.open_dataset(path / filename)
+    ds.coords["lon"] = (ds.coords["lon"] + 180) % 360 - 180
+    ds = ds.sortby([ds.lon, ds.lat])
+    return ds["moisture_sources_grid"].rename("WRF-WVT")
 
 
 def read_uvigo(basedir, casename):
@@ -336,6 +342,7 @@ def read_data(basedir, casename):
             read_flexpart_xu(basedir, casename),
             read_flexpart_tatfancheng(basedir, casename),
             read_uvigo(basedir, casename),
+            read_wrf_wvt(basedir, casename),
         ]
     )
     

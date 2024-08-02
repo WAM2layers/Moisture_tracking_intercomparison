@@ -84,8 +84,7 @@ def calc_regional_sources(
         sources_per_region = sources.weighted(weights).sum(dim=(lat_name, lon_name))
     else:
         mask_3D = regions.mask_3D(sources, lon_name=lon_name, lat_name=lat_name)
-        weights = np.cos(np.deg2rad(sources[lat_name]))
-        weights = (mask_3D * weights).fillna(0)
+        weights = mask_3D.fillna(0)
         sources_per_region = sources.weighted(weights).sum(dim=(lat_name, lon_name))
 
     return sources_per_region, weights
