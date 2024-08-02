@@ -79,11 +79,9 @@ def calc_regional_sources(
         sources_per_region = sources.weighted(weights).sum(dim=(lat_name, lon_name))
     else:
         mask_3D = regions.mask_3D(sources, lon_name=lon_name, lat_name=lat_name)
-        # Next lines is not needed if we use srcs_frac, as they are already area-weighted results
-        # The weights (cosine factors) can be substituted by 1.
-        #weights = np.cos(np.deg2rad(sources[lat_name]))
-        #weights = (mask_3D * weights).fillna(0)
-        weights = (mask_3D*1.).fillna(0)
+        # Use equal weights for each region as we are already using area-weighted fractional sources.
+        # Effectively, the weighting is only used to group grid points of the same region together.
+        weights = mask_3D.fillna(0)
         sources_per_region = sources.weighted(weights).sum(dim=(lat_name, lon_name))
 
     return sources_per_region, weights
