@@ -128,12 +128,15 @@ def calculate_region_attr(all_maps,csv_wrf_wvt,case,path_to_data):
     if case=='Pakistan':
         a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(24,30.1,0.25), np.arange(67,71.1,0.25)) #Calcluate grid cell area for case domain
         ll=17
+        area_chc=286280.17*10**6
     elif case=='Scotland':
         a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(52,60.1,0.25), np.arange(-8,-0.9,0.25))
         ll=29
+        area_chc=411007.96*10**6
     elif case=='Australia':
         a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(-32,-21.9,0.25), np.arange(149,158.1,0.25))
         ll=37
+        area_chc=1097376.96*10**6
         
     '''Define regions, also provides an example how to define them using the regionmask package. 
     
@@ -162,11 +165,13 @@ def calculate_region_attr(all_maps,csv_wrf_wvt,case,path_to_data):
     all_maps_regional={}
     
     for kk in list(all_maps.keys()):
+        if kk=='LAGRANTO-WaterSip (CHc)':area_target=area_chc
+        else: area_target=(a_gridcell_newp[:].sum()*ll)
         all_maps_frac[kk] = calc_fractional_sources(all_maps[kk])
         all_maps_frac_regional[kk] = calc_regional_sources(all_maps_frac[kk],selected_regions)[0]
-        all_maps_abs[kk] = ( all_maps[kk] * a_gridcell_new[:] ) / (a_gridcell_newp[:].sum()*ll)
+        all_maps_abs[kk] = ( all_maps[kk] * a_gridcell_new[:] ) / area_target
         all_maps_regional[kk] = calc_regional_sources(all_maps_abs[kk],selected_regions)[0]
-    
+        
     #### sum of absolute moisture sources (should be equal to precipitation in sink region) ####
     
     precip_sums = np.array([np.sum(all_maps_abs[k]) for k in list(all_maps_abs.keys())])
