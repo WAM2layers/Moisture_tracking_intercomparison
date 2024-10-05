@@ -8,7 +8,7 @@ import matplotlib.ticker as mticker
 import argparse
 
 from Functions import plotting_sources_cases, plotting_sources_one_case, calc_fractional_sources
-from combine_data import read_data
+from combine_data_read import read_data
 from cmocean import cm
 
 def read_args():
@@ -96,7 +96,7 @@ fig_lon_ticks={
 ##################
 #Example for running this code
 
-#python plotting_cases.py --casename Australia --plot_all t --plot_model_member f  --model_member_number 5
+#python plotting_all_cases.py --casename Australia --plot_all t --plot_model_member f  --model_member_number 5
 
 #
 
@@ -123,14 +123,14 @@ if args.plot_all:
         print("--> Plotting sources")
         plotting_sources_cases(ds_data, mask, ds_data.keys(), figwidth=fig_features[case][0], figheight=fig_features[case][1], vmax=fig_features[case][4], central_longitude=maps_features[case][0], figrows=fig_features[case][2], figcols=fig_features[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], fsize=12, fname=f"./OUTPUTS/AbsoluteMoistureSources_{case}.png")
 
-        quit()
+        #quit()
 
-        print("--> PLotting fraction")
-        ds_data_frac = xr.Dataset(coords=ds_data.coords, attrs=ds_data.attrs)
-        for ens in ds_data.keys():
-            ds_data_frac[ens] = calc_fractional_sources(ds_data[ens])
+        #print("--> PLotting fraction")
+        #ds_data_frac = xr.Dataset(coords=ds_data.coords, attrs=ds_data.attrs)
+        #for ens in ds_data.keys():
+        #    ds_data_frac[ens] = calc_fractional_sources(ds_data[ens])
 
-        plotting_sources_cases(ds_data_frac, mask, ds_data.keys(), figwidth=fig_features[case][0], figheight=fig_features[case][1], vmax=fig_features[case][5], central_longitude=maps_features[case][0], figrows=fig_features[case][2], figcols=fig_features[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], cblabel=False, cm=cm.ice_r, fname=f"./OUTPUTS/FractionMoistureSources_{case}.png")
+        #plotting_sources_cases(ds_data_frac, mask, ds_data.keys(), figwidth=fig_features[case][0], figheight=fig_features[case][1], vmax=fig_features[case][5], central_longitude=maps_features[case][0], figrows=fig_features[case][2], figcols=fig_features[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], cblabel=False, cm=cm.ice_r, fname=f"./OUTPUTS/FractionMoistureSources_{case}.png")
 
         print()
 
@@ -145,11 +145,11 @@ if args.plot_model_member:
 
         plotting_sources_one_case(ds_data, mask, [ens_names[args.model_member_number]], figwidth=fig_features_one[case][0], figheight=fig_features_one[case][1], vmax=fig_features_one[case][4], central_longitude=maps_features[case][0], figrows=fig_features_one[case][2], figcols=fig_features_one[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], fname=f"./OUTPUTS/AbsoluteMoistureSources_{case}")
 
-        quit()
-        ds_data_frac = xr.Dataset(coords=ds_data.coords, attrs=ds_data.attrs)
-        for ens in ds_data.keys():
-            ds_data_frac[ens] = calc_fractional_sources(ds_data[ens])
+        #quit()
+        #ds_data_frac = xr.Dataset(coords=ds_data.coords, attrs=ds_data.attrs)
+        #for ens in ds_data.keys():
+        #    ds_data_frac[ens] = calc_fractional_sources(ds_data[ens])
 
-        plotting_sources_one_case(ds_data_frac, mask, [ens_names[args.model_member_number]],  figwidth=fig_features_one[case][0], figheight=fig_features_one[case][1], vmax=fig_features_one[case][5], central_longitude=maps_features[case][0], figrows=fig_features_one[case][2], figcols=fig_features_one[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], cblabel=False, cm=cm.ice_r, fname=f"./OUTPUTS/FractionMoistureSources_{case}")
+        #plotting_sources_one_case(ds_data_frac, mask, [ens_names[args.model_member_number]],  figwidth=fig_features_one[case][0], figheight=fig_features_one[case][1], vmax=fig_features_one[case][5], central_longitude=maps_features[case][0], figrows=fig_features_one[case][2], figcols=fig_features_one[case][3], map_lons_extend=[maps_features[case][1], maps_features[case][2]], map_lats_extend=[maps_features[case][3],maps_features[case][4]], glons=fig_lon_ticks[case], cblabel=False, cm=cm.ice_r, fname=f"./OUTPUTS/FractionMoistureSources_{case}")
 
         print()
