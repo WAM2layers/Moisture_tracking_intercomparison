@@ -5,7 +5,6 @@ import xarray as xr
 import matplotlib.pyplot as plt # Matplotlib is a scientific plotting package.
 import cartopy.crs as crs
 import matplotlib.ticker as mticker
-import os
 import argparse
 
 from Functions import plotting_sources_cases, plotting_sources_one_case, calc_fractional_sources
