@@ -346,6 +346,7 @@ def read_data(basedir, casename):
         ]
     )
     
+
 def read_precip_era5(basedir, casename, exclude):
     A={}
 
@@ -359,9 +360,9 @@ def read_precip_era5(basedir, casename, exclude):
             variable='precip_era5'
             name='2LDRM'
         elif model=='results FLEXPART_WaterSip_TatFanCheng': 
-            filename='/'+casename+'_precip_Ens1.nc'
+            filename='/'+casename+'_precip_Ens2.nc'
             variable='precip_estimate'
-            name='FLEXPART-WaterSip (TFC) Ens1'
+            name='FLEXPART-WaterSip (TFC) Ens2'
         elif model=='results Utrack Arie Staal':
             if casename=='Pakistan': filename='/ERA5_input/'+casename+'_precip.nc'
             else: filename='/'+casename+'_precip.nc'
@@ -375,6 +376,15 @@ def read_precip_era5(basedir, casename, exclude):
             filename='/'+casename.lower()+'_precip.nc'
             variable='precip_era5'
             name='FLEXPART-WaterSip (UniVie)'
+        elif model=='results WAM2layers':
+            name='WAM2layers'
+            if casename=='Pakistan': 
+                filename='/backtrack_*'#2022-08-23T00-00.nc'
+            elif casename=='Scotland':
+                filename='/backtrack_*'#2023-10-08T00-00.nc'
+            elif casename=='Australia': 
+                filename='/backtrack_*'#2022-02-28T00-00.nc'
+            variable='tagged_precip'
         else: 
             filename='/'+casename+'_precip.nc'
             variable='precip_era5'
@@ -391,7 +401,6 @@ def read_precip_era5(basedir, casename, exclude):
             elif model=='results UiB FLEXPART WaterSip':name='FLEXPART-WaterSip (UiB)'
             elif model=='results Uvigo':name='FLEXPART-LATTIN (UVigo)'
             elif model=='results CHc LAGRANTO':name='LAGRANTO-WaterSip (CHc)'
-            elif model=='results WAM2layers':name='WAM2layers'
        
         print(model)
         if model not in exclude: #no precipitation timeline available (or not as mm over sink region)
@@ -403,7 +412,7 @@ def read_precip_era5(basedir, casename, exclude):
                 ds=xr.open_dataset(path+filename,decode_times=True)
                 if casename=='Pakistan':
                     a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(24,30.1,0.25), np.arange(67,71.1,0.25))
-                    A[name]=(ds['precip_era5'][:,240:265,988:1005]*a_gridcell_newp)/(a_gridcell_newp.sum()*17)
+                    A[name]=(ds['precip_era5'][:,240:265,988:1005]*a_gridcell_newp)/(a_gridcell_newp.sum()*18)
                 elif casename=='Scotland':
                     a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(52,60.1,0.25), np.arange(-8,-0.9,0.25))
                     A[name]=(ds['precip_era5'][:,120:153,688:717]*a_gridcell_newp)/(a_gridcell_newp.sum()*29)
@@ -411,6 +420,19 @@ def read_precip_era5(basedir, casename, exclude):
                     a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(-32,-21.9,0.25), np.arange(149,158.1,0.25))
                     A[name]=(ds['precip_era5'][:,448:489,1316:1353]*a_gridcell_newp)/(a_gridcell_newp.sum()*37)                
                 A[name]=A[name].sum(['lon','lat'])
+            elif model=='results WAM2layers':
+                ds=xr.open_mfdataset(path+filename,combine="nested",concat_dim="time")#.sum("time")
+                a_gridcell_new, l_ew_gridcell, l_mid_gridcell = get_grid_info_new(np.arange(-80,80.1,0.25), np.arange(-180,180,0.25))
+                if casename=='Pakistan':
+                    a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(24,30.1,0.25), np.arange(67,71.1,0.25))
+                    A[name]=(ds[variable]*a_gridcell_new)/(a_gridcell_newp.sum()*17)
+                elif casename=='Scotland':
+                    a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(52,60.1,0.25), np.arange(-8,-0.9,0.25))
+                    A[name]=(ds[variable]*a_gridcell_new)/(a_gridcell_newp.sum()*29)
+                elif casename=='Australia':
+                    a_gridcell_newp, l_ew_gridcellp, l_mid_gridcellp = get_grid_info_new(np.arange(-32,-21.9,0.25), np.arange(149,158.1,0.25))
+                    A[name]=(ds[variable]*a_gridcell_new)/(a_gridcell_newp.sum()*37)  
+                A[name]=A[name].sum(['longitude','latitude']) 
             else: 
                 A[name]=xr.open_dataset(path+filename,decode_times=True)[variable]
                 

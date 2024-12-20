@@ -291,27 +291,31 @@ def plot_precip(precip_era5,case,outpath,closeplot):
 
         if precip_era5[i].shape[0]==length/24:
             ax[0].plot(dt[0::24],precip_era5[i],label=i+', 24h',linestyle=ls[nn],color=colors[nn])
-            ax[1].scatter(1,A[-1],color=colors[nn])
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)
         elif precip_era5[i].shape[0]==length:
             precip_era5[i]['time']=np.arange(0,length,1)
             ax[0].plot(dt[0::24],precip_era5[i].groupby_bins('time',np.arange(0,length+1,24),right=False).sum(...),label=i+', 1h',linewidth=lw,linestyle=ls[nn],color=colors[nn])
-            ax[1].scatter(1,A[-1],color=colors[nn])
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)
         elif precip_era5[i].shape[0]==length+1:
             precip_era5[i]['time']=np.arange(0,length+1,1)
             ax[0].plot(dt[0::24],precip_era5[i].groupby_bins('time',np.arange(0,length+2,24),right=False).sum(...),label=i+', 1h',linestyle=ls[nn],linewidth=lw,color=colors[nn])
-            ax[1].scatter(1,A[-1],color=colors[nn])
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)
         elif precip_era5[i].shape[0]==length/6:
             precip_era5[i]['time']=np.arange(0,length,6)
             ax[0].plot(dt[0::24],precip_era5[i].groupby_bins('time',np.arange(0,length+2,24),right=False).sum(...),label=i+', 6h',linestyle=ls[nn],linewidth=lw,color=colors[nn])
-            ax[1].scatter(1,A[-1],color=colors[nn])
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)
         elif precip_era5[i].shape[0]==length/6+1:
             precip_era5[i]['time']=np.arange(0,length+1,6)
-            ax[1].scatter(1,A[-1],color=colors[nn])
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)
             ax[0].plot(dt[0::24],precip_era5[i].groupby_bins('time',np.arange(0,length+2,24),right=False).sum(...),label=i+', 6h',linestyle=ls[nn],linewidth=lw,color=colors[nn])
+        else:
+            ax[1].scatter(1,A[-1],color=colors[nn],label=i)           
 
     ax[1].boxplot(A,zorder=0)
     
-    ax[0].legend(frameon=False,fontsize=14)
+    #ax[0].legend(frameon=False,fontsize=14)
+    ax[1].legend(frameon=False,fontsize=14,bbox_to_anchor=(1.1, 1.01))
+
     ax[0].set_ylabel(u'ERA5 precipitation [mm$\,$24h$^{-1}$]')
 
     ax[1].set_xlim([0.8,1.2])
