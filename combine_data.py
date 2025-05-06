@@ -334,7 +334,7 @@ def read_btrims(basedir, casename):
     return (
         ds.sortby(ds.longitude)
         .rename(latitude="lat", longitude="lon")
-        .rename("B-TrIMS")
+        .rename("BTrIMS")
     )
 
 
@@ -377,7 +377,7 @@ def read_precip_era5(basedir, casename, exclude=[]):
         "results UGhent HAMSTER",
         "results Utrack Arie Staal",
         "results WRF-WVT",
-        "results B-TrIMS",
+        "results BTrIMS",
         "results Ru_Xu_FLEXPART",
         "results UiB FLEXPART WaterSip",
         "results Uvigo",
@@ -433,8 +433,8 @@ def read_precip_era5(basedir, casename, exclude=[]):
                 name = "FLEXPART-HAMSTER Ens5"
             elif model == "results WRF-WVT":
                 name = "WRF_WVT"
-            elif model == "results B-TrIMS":
-                name = "B-TrIMS"
+            elif model == "results BTrIMS":
+                name = "BTrIMS"
                 if casename == "Australia":
                     path = basedir + "/" + casename + "/" + "results_B-TrIMS"
                 else:
@@ -587,7 +587,7 @@ def read_tracked_precip(basedir, casename, exclude=[]):
         "results UGhent HAMSTER",
         "results Utrack Arie Staal",
         "results WRF-WVT",
-        "results B-TrIMS",
+        "results BTrIMS",
         "results Ru_Xu_FLEXPART",
         "results UiB FLEXPART WaterSip",
         "results Uvigo",
@@ -636,8 +636,8 @@ def read_tracked_precip(basedir, casename, exclude=[]):
             name = "FLEXPART-HAMSTER Ens5"
             filename = "/" + casename + "_precip_areacor.nc"
             variable = "precip_era5_sum"
-        elif model == "results B-TrIMS":
-            name = "B-TrIMS"
+        elif model == "results BTrIMS":
+            name = "BTrIMS"
             filename = "/" + casename + "_precip.nc"
             variable = "precip_era5"
             if casename == "Australia":
